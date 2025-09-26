@@ -1,0 +1,435 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Филиал: {{ branch.name }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.branch-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.branch-icon-large {
+    height: 150px;
+    width: 150px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--secondary-color);
+    font-size: 4rem;
+    border: 4px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.info-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.1);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.address-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid var(--secondary-color);
+}
+
+.inventory-section {
+    margin-top: 2rem;
+}
+
+.inventory-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s;
+}
+
+.inventory-item:hover {
+    background-color: #f8f9fa;
+}
+
+.inventory-item:last-child {
+    border-bottom: none;
+}
+
+.book-icon {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    margin-right: 1rem;
+    width: 40px;
+    text-align: center;
+}
+
+.book-info {
+    flex-grow: 1;
+}
+
+.book-title {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.book-meta {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.inventory-stats {
+    text-align: right;
+    margin-right: 1rem;
+}
+
+.available-count {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.total-count {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.tab-content {
+    padding: 1.5rem 0;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom: 3px solid var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .branch-icon-large {
+        height: 120px;
+        width: 120px;
+        font-size: 2.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .inventory-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .inventory-stats {
+        text-align: center;
+        margin: 0.5rem 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="branch-header">
+    <div class="container text-center">
+        <nav aria-label="breadcrumb" class="justify-content-center">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'branch_list' %}" class="text-white">Филиалы</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">{{ branch.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="branch-icon-large">
+            <i class="fas fa-book-reader"></i>
+        </div>
+        
+        <h1 class="branches-title text-light">{{ branch.name }}</h1>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Branch Information -->
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-info-circle me-2"></i>Информация о филиале</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <p><strong>Название:</strong> {{ branch.name }}</p>
+                    </div>
+                </div>
+                
+                <div class="address-card">
+                    <h5><i class="fas fa-map-marker-alt me-2"></i>Адрес</h5>
+                    <p class="mb-0">{{ branch.address|linebreaksbr }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <p><strong>Дата создания:</strong> {{ branch.created_at|date:"d.m.Y" }}</p>
+                </div>
+                
+                <!-- Statistics -->
+                <h3 class="mb-3">Статистика филиала</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ inventory_items.count }}</div>
+                        <div class="stat-label">Всего книг в наличии</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ total_copies }}</div>
+                        <div class="stat-label">Всего экземпляров</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ available_copies }}</div>
+                        <div class="stat-label">Доступно экземпляров</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ active_loans }}</div>
+                        <div class="stat-label">Активных выдач</div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    {% if user.is_staff %}
+                    <a href="{% url 'branch_edit' branch.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Редактировать филиал
+                    </a>
+                    <a href="{% url 'branch_delete' branch.pk %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i>Удалить филиал
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'branch_list' %}" class="btn btn-outline-secondary ms-auto">
+                        <i class="fas fa-arrow-left me-2"></i>Назад к списку филиалов
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-bolt me-2"></i>Быстрые действия</h2>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'inventory_query' %}?branch={{ branch.id }}" class="btn btn-outline-primary">
+                        <i class="fas fa-search me-2"></i>Поиск в инвентаре
+                    </a>
+                    <a href="{% url 'loan_add' %}" class="btn btn-outline-success">
+                        <i class="fas fa-book me-2"></i>Выдать книгу
+                    </a>
+                    <a href="{% url 'inventory_add' %}" class="btn btn-outline-info">
+                        <i class="fas fa-boxes me-2"></i>Добавить в инвентарь
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="info-card mt-4">
+                <h2 class="mb-4"><i class="fas fa-history me-2"></i>Последние выдачи</h2>
+                
+                {% if recent_loans %}
+                <div class="list-group">
+                    {% for loan in recent_loans|slice:":5" %}
+                    <div class="list-group-item border-0 px-0 py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">{{ loan.book.title|truncatewords:3 }}</h6>
+                                <small class="text-muted">{{ loan.student.get_full_name }}</small>
+                            </div>
+                            <span class="badge {% if loan.is_returned %}bg-success{% else %}bg-warning{% endif %}">
+                                {% if loan.is_returned %}Возвращена{% else %}На руках{% endif %}
+                            </span>
+                        </div>
+                        <small class="text-muted">{{ loan.issue_date|date:"d.m.Y" }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">Нет данных о выдачах</p>
+                </div>
+                {% endif %}
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'loan_list' %}?branch={{ branch.id }}" class="btn btn-sm btn-outline-secondary">
+                        Все выдачи филиала
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Inventory Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-boxes me-2"></i>Инвентарь филиала</h2>
+                
+                <ul class="nav nav-tabs" id="inventoryTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">
+                            Все книги ({{ inventory_items.count }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="available-tab" data-bs-toggle="tab" data-bs-target="#available" type="button" role="tab">
+                            Доступные ({{ available_books.count }})
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="inventoryTabsContent">
+                    <div class="tab-pane fade show active" id="all" role="tabpanel">
+                        {% if inventory_items %}
+                        <div class="inventory-section">
+                            {% for item in inventory_items|slice:":10" %}
+                            <div class="inventory-item">
+                                <div class="book-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="book-info">
+                                    <div class="book-title">{{ item.book.title }}</div>
+                                    <div class="book-meta">
+                                        {{ item.book.get_authors_display }} · {{ item.book.publication_year }} год
+                                    </div>
+                                </div>
+                                <div class="inventory-stats">
+                                    <div class="available-count">{{ item.available_copies }} из {{ item.total_copies }}</div>
+                                    <div class="total-count">доступно</div>
+                                </div>
+                                <a href="{% url 'book_detail' item.book.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if inventory_items.count > 10 %}
+                            <div class="text-center mt-3">
+                                <a href="#" class="btn btn-sm btn-outline-secondary">
+                                    Показать все {{ inventory_items.count }} книг
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-box-open fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">В инвентаре пока нет книг</p>
+                            {% if user.is_staff %}
+                            <a href="{% url 'inventory_add' %}" class="btn btn-primary mt-2">
+                                <i class="fas fa-plus me-2"></i>Добавить книги в инвентарь
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="tab-pane fade" id="available" role="tabpanel">
+                        {% if available_books %}
+                        <div class="inventory-section">
+                            {% for item in available_books|slice:":10" %}
+                            <div class="inventory-item">
+                                <div class="book-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="book-info">
+                                    <div class="book-title">{{ item.book.title }}</div>
+                                    <div class="book-meta">
+                                        {{ item.book.get_authors_display }} · {{ item.book.publication_year }} год
+                                    </div>
+                                </div>
+                                <div class="inventory-stats">
+                                    <div class="available-count">{{ item.available_copies }} из {{ item.total_copies }}</div>
+                                    <div class="total-count">доступно</div>
+                                </div>
+                                <a href="{% url 'book_detail' item.book.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if available_books.count > 10 %}
+                            <div class="text-center mt-3">
+                                <a href="#" class="btn btn-sm btn-outline-secondary">
+                                    Показать все {{ available_books.count }} книг
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-times-circle fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">Нет доступных книг в инвентаре</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tabs
+    const triggerTabList = [].slice.call(document.querySelectorAll('#inventoryTabs button'));
+    triggerTabList.forEach(function (triggerEl) {
+        new bootstrap.Tab(triggerEl);
+    });
+});
+</script>
+{% endblock %}

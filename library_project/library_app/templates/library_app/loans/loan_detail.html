@@ -1,0 +1,248 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Выдача: {{ loan }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.loan-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.info-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.1);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.detail-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+.detail-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.detail-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-returned {
+    background-color: #d8d8d8;
+    color: #495057;
+}
+
+.overdue-warning {
+    background-color: #f8d7da;
+    color: #842029;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    border-left: 4px solid #dc3545;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="loan-header">
+    <div class="container text-center">
+        <nav aria-label="breadcrumb" class="justify-content-center">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'loan_list' %}" class="text-white">Выдачи</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Детали выдачи</li>
+            </ol>
+        </nav>
+        
+        <h1 class="loans-title text-light">Детали выдачи</h1>
+        <p class="loans-subtitle">Подробная информация о выдаче книги</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Loan Information -->
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-info-circle me-2"></i>Информация о выдаче</h2>
+                
+                <!-- Status Badge -->
+                <div class="mb-4">
+                    <span class="status-badge {% if loan.is_returned %}status-returned{% else %}status-active{% endif %}">
+                        {% if loan.is_returned %}
+                        <i class="fas fa-check-circle me-1"></i>Возвращена
+                        {% else %}
+                        <i class="fas fa-clock me-1"></i>Активна
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <!-- Overdue Warning -->
+                {% if not loan.is_returned and is_overdue %}
+                <div class="overdue-warning">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Просрочена!</h5>
+                    <p class="mb-0">Книга просрочена на {{ overdue_days }} дней. Пожалуйста, верните книгу как можно скорее.</p>
+                </div>
+                {% endif %}
+                
+                <!-- Details Grid -->
+                <div class="detail-grid">
+                    <div class="detail-card">
+                        <div class="detail-label">Книга</div>
+                        <div class="detail-value">{{ loan.book.title }}</div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <div class="detail-label">Студент</div>
+                        <div class="detail-value">
+                            {{ loan.student.last_name }} {{ loan.student.first_name }}
+                            <br>
+                            <small>{{ loan.student.student_id }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <div class="detail-label">Филиал</div>
+                        <div class="detail-value">{{ loan.branch.name }}</div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <div class="detail-label">Дата выдачи</div>
+                        <div class="detail-value">{{ loan.issue_date|date:"d.m.Y H:i" }}</div>
+                    </div>
+                    
+                    {% if loan.return_date %}
+                    <div class="detail-card">
+                        <div class="detail-label">Дата возврата</div>
+                        <div class="detail-value">{{ loan.return_date|date:"d.m.Y H:i" }}</div>
+                    </div>
+                    
+                    <div class="detail-card">
+                        <div class="detail-label">Длительность</div>
+                        <div class="detail-value">{{ loan.issue_date|timesince:loan.return_date }}</div>
+                    </div>
+                    {% else %}
+                    <div class="detail-card">
+                        <div class="detail-label">Длительность</div>
+                        <div class="detail-value">{{ loan.issue_date|timesince }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="detail-card">
+                        <div class="detail-label">Выдал</div>
+                        <div class="detail-value">
+                            {% if loan.created_by %}
+                                {{ loan.created_by.get_full_name|default:loan.created_by.username }}
+                            {% else %}
+                                Неизвестно
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    {% if user.is_staff and not loan.is_returned %}
+                    <a href="{% url 'loan_return' loan.pk %}" class="btn btn-success">
+                        <i class="fas fa-undo me-2"></i>Вернуть книгу
+                    </a>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <a href="{% url 'loan_edit' loan.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Редактировать
+                    </a>
+                    <a href="{% url 'loan_delete' loan.pk %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i>Удалить
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'loan_list' %}" class="btn btn-outline-secondary ms-auto">
+                        <i class="fas fa-arrow-left me-2"></i>Назад к списку
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-bolt me-2"></i>Быстрые действия</h2>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'book_detail' loan.book.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-book me-2"></i>Перейти к книге
+                    </a>
+                    
+                    <a href="{% url 'student_detail' loan.student.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-graduate me-2"></i>Перейти к студенту
+                    </a>
+                    
+                    <a href="{% url 'branch_detail' loan.branch.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-building me-2"></i>Перейти к филиалу
+                    </a>
+                </div>
+                
+                <hr>
+                
+                <h5 class="mb-3">Статистика студента</h5>
+                <div class="detail-card mb-3">
+                    <div class="detail-label">Всего выдач</div>
+                    <div class="detail-value">{{ loan.student.loans.count }}</div>
+                </div>
+                
+                <div class="detail-card">
+                    <div class="detail-label">Активных выдач</div>
+                    <div class="detail-value">{{ loan.student.loans.filter(is_returned=False).count }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,269 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Список авторов - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Author List Styles */
+.authors-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.authors-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.authors-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.search-section {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.author-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.author-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(68, 122, 176, 0.15);
+    border-color: var(--secondary-color);
+}
+
+.author-avatar {
+    height: 120px;
+    width: 120px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--secondary-color);
+    font-size: 2.5rem;
+}
+
+.author-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.author-books-count {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.author-meta {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.author-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.stats-badge {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+    border: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+    .authors-title {
+        font-size: 2rem;
+    }
+    
+    .author-actions {
+        flex-direction: column;
+    }
+    
+    .author-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="authors-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="authors-title text-light">Каталог авторов</h1>
+                <p class="authors-subtitle">Все авторы библиотечной системы</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="stats-badge d-inline-block">
+                    <i class="fas fa-user-edit me-1"></i> Всего: {{ authors.paginator.count }} авторов
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Search Section -->
+    <div class="search-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <label for="search" class="form-label">Поиск по имени автора</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Введите фамилию, имя или отчество автора...">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <div class="d-flex gap-2 w-100">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Найти
+                    </button>
+                    <a href="{% url 'author_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Сбросить
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'author_add' %}" class="btn btn-success ms-auto">
+                        <i class="fas fa-plus me-2"></i>Добавить автора
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Authors Grid -->
+    <div class="row">
+        {% for author in authors %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="author-card">
+                <div class="author-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                
+                <h3 class="author-name">{{ author.last_name }} {{ author.first_name }}</h3>
+                {% if author.middle_name %}
+                <p class="author-meta">{{ author.middle_name }}</p>
+                {% endif %}
+                
+                <div class="author-books-count">
+                    <i class="fas fa-book me-1"></i>Книг: {{ author.books.count }}
+                </div>
+                
+                <div class="author-actions">
+                    <a href="{% url 'author_detail' author.pk %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>Подробнее
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'author_edit' author.pk %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-edit me-1"></i>Редактировать
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Авторы не найдены</h4>
+                <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                <a href="{% url 'author_list' %}" class="btn btn-primary mt-2">
+                    <i class="fas fa-redo me-2"></i>Показать всех авторов
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if authors.has_other_pages %}
+    <div class="pagination-container">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if authors.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ authors.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+
+                {% for i in authors.paginator.page_range %}
+                    {% if authors.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if authors.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ authors.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="text-center text-muted mt-2">
+            Страница {{ authors.number }} из {{ authors.paginator.num_pages }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit search form when typing stops
+    const searchInput = document.getElementById('search');
+    let searchTimeout;
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                this.closest('form').submit();
+            }, 800);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,349 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Список выдач - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.loans-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.loans-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.loans-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.search-section {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.loan-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.loan-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(68, 122, 176, 0.15);
+    border-color: var(--secondary-color);
+}
+
+.loan-status {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.status-active {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-returned {
+    background-color: #d8d8d8;
+    color: #495057;
+}
+
+.status-overdue {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.loan-book {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.loan-student {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+}
+
+.loan-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.loan-date {
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+.loan-branch {
+    color: #6c757d;
+}
+
+.loan-duration {
+    color: #495057;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.loan-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.stats-badge {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+    border: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+    .loans-title {
+        font-size: 2rem;
+    }
+    
+    .loan-actions {
+        flex-direction: column;
+    }
+    
+    .loan-actions .btn {
+        width: 100%;
+    }
+    
+    .loan-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="loans-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="loans-title text-light">Выдачи книг</h1>
+                <p class="loans-subtitle">История выдачи книг студентам</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="stats-badge d-inline-block me-2">
+                    <i class="fas fa-book me-1"></i> Всего: {{ loans.paginator.count }} выдач
+                </div>
+                <div class="stats-badge d-inline-block">
+                    <i class="fas fa-clock me-1"></i> Активных: {{ active_loans_count }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Search and Filters Section -->
+    <div class="search-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="status" class="form-label">Статус выдачи</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">Все выдачи</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Активные</option>
+                    <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>Возвращенные</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="branch" class="form-label">Филиал</label>
+                <select class="form-select" id="branch" name="branch">
+                    <option value="">Все филиалы</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"s" %}selected{% endif %}>
+                        {{ branch.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter me-2"></i>Применить фильтры
+                    </button>
+                    <a href="{% url 'loan_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Сбросить
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'loan_add' %}" class="btn btn-success ms-auto">
+                        <i class="fas fa-plus me-2"></i>Новая выдача
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Loans List -->
+    <div class="row">
+        {% for loan in loans %}
+        <div class="col-12 mb-4">
+            <div class="loan-card">
+                <div class="loan-status {% if loan.is_returned %}status-returned{% else %}status-active{% endif %}">
+                    {% if loan.is_returned %}
+                    <i class="fas fa-check-circle me-1"></i>Возвращена
+                    {% else %}
+                    <i class="fas fa-clock me-1"></i>Активна
+                    {% endif %}
+                </div>
+                
+                <h3 class="loan-book">{{ loan.book.title }}</h3>
+                
+                <div class="loan-student">
+                    <i class="fas fa-user-graduate me-1"></i>
+                    {{ loan.student.last_name }} {{ loan.student.first_name }} 
+                    ({{ loan.student.student_id }})
+                </div>
+                
+                <div class="loan-meta">
+                    <span class="loan-date">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Выдана: {{ loan.issue_date|date:"d.m.Y" }}
+                    </span>
+                    <span class="loan-branch">
+                        <i class="fas fa-building me-1"></i>
+                        {{ loan.branch.name }}
+                    </span>
+                </div>
+                
+                {% if loan.return_date %}
+                <div class="loan-duration">
+                    <i class="fas fa-history me-1"></i>
+                    Возвращена: {{ loan.return_date|date:"d.m.Y" }} 
+                    (длительность: {{ loan.issue_date|timesince:loan.return_date }})
+                </div>
+                {% elif not loan.is_returned %}
+                <div class="loan-duration">
+                    <i class="fas fa-history me-1"></i>
+                    Длительность: {{ loan.issue_date|timesince }}
+                </div>
+                {% endif %}
+                
+                <div class="loan-actions">
+                    <a href="{% url 'loan_detail' loan.pk %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>Подробнее
+                    </a>
+                    {% if user.is_staff and not loan.is_returned %}
+                    <a href="{% url 'loan_return' loan.pk %}" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-undo me-1"></i>Вернуть
+                    </a>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <a href="{% url 'loan_delete' loan.pk %}" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-trash me-1"></i>Удалить
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Выдачи не найдены</h4>
+                <p class="text-muted">Попробуйте изменить параметры фильтрации</p>
+                <a href="{% url 'loan_list' %}" class="btn btn-primary mt-2">
+                    <i class="fas fa-redo me-2"></i>Показать все выдачи
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if loans.has_other_pages %}
+    <div class="pagination-container">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if loans.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ loans.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+
+                {% for i in loans.paginator.page_range %}
+                    {% if loans.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if loans.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ loans.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="text-center text-muted mt-2">
+            Страница {{ loans.number }} из {{ loans.paginator.num_pages }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit filter form when status or branch changes
+    const statusSelect = document.getElementById('status');
+    const branchSelect = document.getElementById('branch');
+    
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    }
+    
+    if (branchSelect) {
+        branchSelect.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    }
+});
+</script>
+{% endblock %}

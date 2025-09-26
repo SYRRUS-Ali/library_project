@@ -1,0 +1,357 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Факультет: {{ faculty.name }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.faculty-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.faculty-icon-large {
+    height: 150px;
+    width: 150px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--secondary-color);
+    font-size: 3.5rem;
+    border: 4px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.info-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.1);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.students-section, .usage-section {
+    margin-top: 2rem;
+}
+
+.student-item, .usage-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s;
+}
+
+.student-item:hover, .usage-item:hover {
+    background-color: #f8f9fa;
+}
+
+.student-item:last-child, .usage-item:last-child {
+    border-bottom: none;
+}
+
+.student-icon, .usage-icon {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    margin-right: 1rem;
+    width: 40px;
+    text-align: center;
+}
+
+.student-info, .usage-info {
+    flex-grow: 1;
+}
+
+.student-name, .usage-book {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.student-id, .usage-branch {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.tab-content {
+    padding: 1.5rem 0;
+}
+
+.nav-tabs .nav-link {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .faculty-icon-large {
+        height: 120px;
+        width: 120px;
+        font-size: 2.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="faculty-header">
+    <div class="container text-center">
+        <nav aria-label="breadcrumb" class="justify-content-center">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'faculty_list' %}" class="text-white">Факультеты</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">{{ faculty.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="faculty-icon-large">
+            <i class="fas fa-university"></i>
+        </div>
+        
+        <h1 class="faculties-title text-light">{{ faculty.name }}</h1>
+        {% if faculty.description %}
+        <p class="faculties-subtitle">{{ faculty.description|truncatewords:10 }}</p>
+        {% endif %}
+    </div>
+</section>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Faculty Information -->
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-info-circle me-2"></i>Информация о факультете</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <p><strong>Название:</strong> {{ faculty.name }}</p>
+                    </div>
+                    {% if faculty.description %}
+                    <div class="col-md-12">
+                        <p><strong>Описание:</strong> {{ faculty.description }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6">
+                        <p><strong>Дата создания:</strong> {{ faculty.created_at|date:"d.m.Y" }}</p>
+                    </div>
+                </div>
+                
+                <!-- Statistics -->
+                <h3 class="mb-3">Статистика</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ faculty.students.count }}</div>
+                        <div class="stat-label">Студентов</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ faculty.book_usage.count }}</div>
+                        <div class="stat-label">Использований книг</div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    {% if user.is_staff %}
+                    <a href="{% url 'faculty_edit' faculty.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Редактировать
+                    </a>
+                    <a href="{% url 'faculty_delete' faculty.pk %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i>Удалить
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'faculty_list' %}" class="btn btn-outline-secondary ms-auto">
+                        <i class="fas fa-arrow-left me-2"></i>Назад к списку
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Quick Stats -->
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-chart-bar me-2"></i>Быстрая статистика</h2>
+                
+                <div class="stat-card mb-3">
+                    <div class="stat-number">{{ faculty.students.count }}</div>
+                    <div class="stat-label">Зарегистрированных студентов</div>
+                </div>
+                
+                <div class="stat-card mb-3">
+                    <div class="stat-number">{{ faculty.book_usage.count }}</div>
+                    <div class="stat-label">Записей об использовании книг</div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'student_list' %}?faculty={{ faculty.id }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-users me-1"></i>Просмотреть студентов
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabs Section -->
+    <div class="info-card mt-4">
+        <ul class="nav nav-tabs" id="facultyTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab" aria-controls="students" aria-selected="true">
+                    <i class="fas fa-users me-2"></i>Студенты ({{ faculty.students.count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="usage-tab" data-bs-toggle="tab" data-bs-target="#usage" type="button" role="tab" aria-controls="usage" aria-selected="false">
+                    <i class="fas fa-book me-2"></i>Использование книг ({{ faculty.book_usage.count }})
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="facultyTabsContent">
+            <!-- Students Tab -->
+            <div class="tab-pane fade show active" id="students" role="tabpanel" aria-labelledby="students-tab">
+                {% if faculty.students.all %}
+                <div class="students-section">
+                    {% for student in faculty.students.all|slice:":10" %}
+                    <div class="student-item">
+                        <div class="student-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="student-info">
+                            <div class="student-name">{{ student.last_name }} {{ student.first_name }}</div>
+                            <div class="student-id">
+                                {{ student.student_id }}
+                            </div>
+                        </div>
+                        <a href="{% url 'student_detail' student.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if faculty.students.count > 10 %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'student_list' %}?faculty={{ faculty.id }}" class="btn btn-sm btn-outline-secondary">
+                            Показать всех {{ faculty.students.count }} студентов
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-user-graduate fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">На факультете пока нет студентов</p>
+                    {% if user.is_staff %}
+                    <a href="{% url 'student_add' %}" class="btn btn-primary mt-2">
+                        <i class="fas fa-plus me-2"></i>Добавить студента
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Usage Tab -->
+            <div class="tab-pane fade" id="usage" role="tabpanel" aria-labelledby="usage-tab">
+                {% if faculty.book_usage.all %}
+                <div class="usage-section">
+                    {% for usage in faculty.book_usage.all|slice:":10" %}
+                    <div class="usage-item">
+                        <div class="usage-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="usage-info">
+                            <div class="usage-book">{{ usage.book.title }}</div>
+                            <div class="usage-branch">
+                                Филиал: {{ usage.branch.name }} · {{ usage.created_at|date:"d.m.Y" }}
+                            </div>
+                        </div>
+                        <a href="{% url 'book_detail' usage.book.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if faculty.book_usage.count > 10 %}
+                    <div class="text-center mt-3">
+                        <a href="#" class="btn btn-sm btn-outline-secondary">
+                            Показать все {{ faculty.book_usage.count }} записей
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-book-open fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">Нет записей об использовании книг</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tabs
+    const triggerTabList = document.querySelectorAll('#facultyTabs button')
+    triggerTabList.forEach(triggerEl => {
+        new bootstrap.Tab(triggerEl)
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Доступ запрещен - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.error-header {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    padding: 4rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.error-icon {
+    font-size: 6rem;
+    margin-bottom: 2rem;
+    color: #ff6b6b;
+}
+
+.error-content {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.error-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.error-subtitle {
+    font-size: 1.5rem;
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+}
+
+.error-description {
+    font-size: 1.1rem;
+    color: #34495e;
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-code {
+    font-size: 8rem;
+    font-weight: 900;
+    color: #f1f2f6;
+    position: absolute;
+    z-index: -1;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@media (max-width: 768px) {
+    .error-title {
+        font-size: 2rem;
+    }
+    
+    .error-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .error-actions .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+    
+    .error-code {
+        font-size: 5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-header">
+    <div class="container text-center">
+        <h1 class="error-title text-light">403</h1>
+        <p class="error-subtitle text-light">Доступ запрещен</p>
+    </div>
+</div>
+
+<div class="container position-relative">
+    <div class="error-code">403</div>
+    
+    <div class="error-content">
+        <div class="error-icon">
+            <i class="fas fa-ban"></i>
+        </div>
+        
+        <h2 class="error-title">Доступ запрещен</h2>
+        
+        <p class="error-subtitle">У вас нет прав для просмотра этой страницы</p>
+        
+        <div class="error-description">
+            <p>К сожалению, у вас недостаточно прав для доступа к запрашиваемой странице. 
+            Это может быть связано с ограничениями вашей учетной записи или настройками системы.</p>
+            
+            <p>Если вы считаете, что это ошибка, пожалуйста, обратитесь к администратору системы.</p>
+        </div>
+        
+        <div class="error-actions">
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-home me-2"></i>На главную
+            </a>
+            
+            <a href="{% url 'book_list' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-book me-2"></i>К каталогу книг
+            </a>
+            
+            {% if not user.is_authenticated %}
+            <a href="{% url 'login' %}" class="btn btn-success btn-lg">
+                <i class="fas fa-sign-in-alt me-2"></i>Войти в систему
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

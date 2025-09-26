@@ -1,0 +1,192 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Удалить студента: {{ student.get_full_name }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.delete-header {
+    background: linear-gradient(135deg, #fe34486c 0%, #c8233337 100%);
+    border: 1 solid red;
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.confirmation-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+    border-left: 4px solid #dc3545;
+}
+
+.warning-icon {
+    font-size: 4rem;
+    color: #dc3545;
+    margin-bottom: 1.5rem;
+}
+
+.student-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid #6c757d;
+}
+
+.consequences-list {
+    background: #fff3cd;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    border-left: 3px solid #ffc107;
+}
+
+.consequences-list ul {
+    margin-bottom: 0;
+}
+
+.consequences-list li {
+    margin-bottom: 0.5rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.student-avatar {
+    height: 100px;
+    width: 100px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--secondary-color);
+    font-size: 2.5rem;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 0.25rem;
+}
+
+.stat-number {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #dc3545;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="delete-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'student_list' %}" class="text-white">Студенты</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'student_detail' student.pk %}" class="text-white">{{ student.get_full_name|truncatewords:2 }}</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Удаление</li>
+            </ol>
+        </nav>
+        <h1 class="books-title text-dark">Удаление студента</h1>
+        <p class="books-subtitle">Подтвердите удаление студента из системы</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="confirmation-card text-center">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                
+                <h2 class="mb-4">Вы уверены, что хотите удалить этого студента?</h2>
+                
+                <div class="student-avatar">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                
+                <div class="student-info text-start">
+                    <h4>{{ student.last_name }} {{ student.first_name }}</h4>
+                    <p class="mb-1"><strong>Номер студенческого:</strong> {{ student.student_id }}</p>
+                    <p class="mb-1"><strong>Факультет:</strong> {{ student.faculty.name }}</p>
+                    <p class="mb-0"><small>Зарегистрирован: {{ student.created_at|date:"d.m.Y" }}</small></p>
+                    
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ loans_count }}</div>
+                            <div class="stat-label">всего выдач</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ active_loans }}</div>
+                            <div class="stat-label">активных выдач</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="consequences-list text-start">
+                    <h5 class="text-warning"><i class="fas fa-exclamation-circle me-2"></i>Важные последствия:</h5>
+                    <ul>
+                        <li>Студент будет полностью удален из системы</li>
+                        <li>История выдач этого студента сохранится, но связь со студентом будет потеряна</li>
+                        <li>Это действие нельзя отменить</li>
+                        {% if active_loans > 0 %}
+                        <li class="text-danger"><strong>Внимание:</strong> У этого студента есть {{ active_loans }} активных выдач!</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="action-buttons">
+                        <a href="{% url 'student_detail' student.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Отмена
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Да, удалить студента
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

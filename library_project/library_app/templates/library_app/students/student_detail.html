@@ -1,0 +1,430 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Студент: {{ student.get_full_name }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.student-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.student-avatar-large {
+    height: 150px;
+    width: 150px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--secondary-color);
+    font-size: 4rem;
+    border: 4px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.info-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.1);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.loans-section {
+    margin-top: 2rem;
+}
+
+.loan-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s;
+}
+
+.loan-item:hover {
+    background-color: #f8f9fa;
+}
+
+.loan-item:last-child {
+    border-bottom: none;
+}
+
+.book-icon {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    margin-right: 1rem;
+    width: 40px;
+    text-align: center;
+}
+
+.loan-info {
+    flex-grow: 1;
+}
+
+.book-title {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.loan-meta {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.loan-status {
+    text-align: right;
+    margin-right: 1rem;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.faculty-badge {
+    background: var(--secondary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.tab-content {
+    padding: 1.5rem 0;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.overdue {
+    background-color: #fff5f5;
+    border-left: 4px solid #dc3545;
+}
+
+@media (max-width: 768px) {
+    .student-avatar-large {
+        height: 120px;
+        width: 120px;
+        font-size: 2.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .loan-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .loan-status {
+        text-align: center;
+        margin: 0.5rem 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="student-header">
+    <div class="container text-center">
+        <nav aria-label="breadcrumb" class="justify-content-center">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'student_list' %}" class="text-white">Студенты</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">{{ student.get_full_name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="student-avatar-large">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+        
+        <h1 class="students-title text-light">{{ student.last_name }} {{ student.first_name }}</h1>
+        <p class="students-subtitle">{{ student.student_id }}</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Student Information -->
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-info-circle me-2"></i>Информация о студенте</h2>
+                
+                <div class="faculty-badge">
+                    <i class="fas fa-graduation-cap me-2"></i>{{ student.faculty.name }}
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Фамилия:</strong> {{ student.last_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Имя:</strong> {{ student.first_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Номер студенческого:</strong> {{ student.student_id }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Дата регистрации:</strong> {{ student.created_at|date:"d.m.Y" }}</p>
+                    </div>
+                </div>
+                
+                <!-- Statistics -->
+                <h3 class="mb-3">Статистика выдачи книг</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ total_loans }}</div>
+                        <div class="stat-label">Всего выдач</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ active_loans.count }}</div>
+                        <div class="stat-label">Активных выдач</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ returned_loans }}</div>
+                        <div class="stat-label">Возвращенных книг</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ overdue_loans }}</div>
+                        <div class="stat-label">Просроченных</div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    {% if user.is_staff %}
+                    <a href="{% url 'student_edit' student.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Редактировать данные
+                    </a>
+                    <a href="{% url 'student_delete' student.pk %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i>Удалить студента
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'student_list' %}" class="btn btn-outline-secondary ms-auto">
+                        <i class="fas fa-arrow-left me-2"></i>Назад к списку
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-bolt me-2"></i>Быстрые действия</h2>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'loan_add' %}?student={{ student.id }}" class="btn btn-outline-success">
+                        <i class="fas fa-book me-2"></i>Выдать книгу
+                    </a>
+                    {% if active_loans %}
+                    <a href="#active-loans" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>Активные выдачи ({{ active_loans.count }})
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'loan_list' %}?student={{ student.id }}" class="btn btn-outline-info">
+                        <i class="fas fa-history me-2"></i>История выдач
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Faculty Information -->
+            <div class="info-card mt-4">
+                <h2 class="mb-4"><i class="fas fa-graduation-cap me-2"></i>Информация о факультете</h2>
+                
+                <h5>{{ student.faculty.name }}</h5>
+                {% if student.faculty.description %}
+                <p class="text-muted">{{ student.faculty.description|truncatewords:20 }}</p>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between mt-3">
+                    <span class="text-muted">Студентов на факультете:</span>
+                    <span class="fw-bold">{{ student.faculty.students.count }}</span>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'faculty_detail' student.faculty.pk %}" class="btn btn-sm btn-outline-secondary">
+                        Подробнее о факультете
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loans Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="info-card">
+                <h2 class="mb-4"><i class="fas fa-book me-2"></i>Выдачи книг</h2>
+                
+                <ul class="nav nav-tabs" id="loansTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">
+                            Активные выдачи ({{ active_loans.count }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                            История выдач ({{ loan_history.count }})
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="loansTabsContent">
+                    <div class="tab-pane fade show active" id="active" role="tabpanel">
+                        {% if active_loans %}
+                        <div class="loans-section">
+                            {% for loan in active_loans %}
+                            <div class="loan-item {% if loan.is_overdue %}overdue{% endif %}">
+                                <div class="book-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="loan-info">
+                                    <div class="book-title">{{ loan.book.title }}</div>
+                                    <div class="loan-meta">
+                                        Выдана: {{ loan.issue_date|date:"d.m.Y" }} · 
+                                        Филиал: {{ loan.branch.name }} ·
+                                        {% if loan.is_overdue %}
+                                        <span class="text-danger">Просрочена на {{ loan.overdue_days }} дней</span>
+                                        {% else %}
+                                        Срок: {{ loan.due_date|date:"d.m.Y" }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="loan-status">
+                                    <span class="badge {% if loan.is_overdue %}bg-danger{% else %}bg-warning{% endif %} status-badge">
+                                        {% if loan.is_overdue %}Просрочена{% else %}На руках{% endif %}
+                                    </span>
+                                </div>
+                                <a href="{% url 'loan_detail' loan.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
+                            <p class="text-muted">Нет активных выдач</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="tab-pane fade" id="history" role="tabpanel">
+                        {% if loan_history %}
+                        <div class="loans-section">
+                            {% for loan in loan_history|slice:":10" %}
+                            <div class="loan-item">
+                                <div class="book-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="loan-info">
+                                    <div class="book-title">{{ loan.book.title }}</div>
+                                    <div class="loan-meta">
+                                        Выдана: {{ loan.issue_date|date:"d.m.Y" }} · 
+                                        Возвращена: {{ loan.return_date|date:"d.m.Y" }} ·
+                                        Филиал: {{ loan.branch.name }}
+                                    </div>
+                                </div>
+                                <div class="loan-status">
+                                    <span class="badge bg-success status-badge">Возвращена</span>
+                                </div>
+                                <a href="{% url 'loan_detail' loan.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if loan_history.count > 10 %}
+                            <div class="text-center mt-3">
+                                <a href="{% url 'loan_list' %}?student={{ student.id }}" class="btn btn-sm btn-outline-secondary">
+                                    Показать все {{ loan_history.count }} выдач
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-history fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">Нет истории выдач</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tabs
+    const triggerTabList = [].slice.call(document.querySelectorAll('#loansTabs button'));
+    triggerTabList.forEach(function (triggerEl) {
+        new bootstrap.Tab(triggerEl);
+    });
+    
+    // Scroll to active loans if URL has hash
+    if (window.location.hash === '#active-loans') {
+        document.getElementById('active-tab').click();
+        document.getElementById('loansTabs').scrollIntoView({ behavior: 'smooth' });
+    }
+});
+</script>
+{% endblock %}

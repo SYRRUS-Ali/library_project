@@ -1,0 +1,382 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Отчеты - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.reports-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.reports-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.reports-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.report-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.report-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(68, 122, 176, 0.15);
+    border-color: var(--secondary-color);
+}
+
+.report-icon {
+    height: 80px;
+    width: 80px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--secondary-color);
+    font-size: 2rem;
+}
+
+.report-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.report-description {
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    min-height: 3rem;
+}
+
+.report-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.report-stat {
+    text-align: center;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+}
+
+.report-stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.report-stat-label {
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+.report-action {
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quick-stat {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.quick-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.15);
+}
+
+.quick-stat-icon {
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+
+.quick-stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.quick-stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.recent-activity {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: var(--secondary-color);
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-time {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .reports-title {
+        font-size: 2rem;
+    }
+    
+    .report-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-stat {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="reports-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="reports-title text-light">Отчеты и аналитика</h1>
+                <p class="reports-subtitle">Статистика и аналитические отчеты библиотечной системы</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="stats-badge d-inline-block bg-light text-dark px-3 py-2 rounded-pill">
+                    <i class="fas fa-chart-line me-1"></i> Обновлено: {% now "d.m.Y H:i" %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Quick Statistics -->
+    <div class="stats-grid">
+        <div class="quick-stat">
+            <div class="quick-stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="quick-stat-number">{{ total_books }}</div>
+            <div class="quick-stat-label">Всего книг в каталоге</div>
+        </div>
+        
+        <div class="quick-stat">
+            <div class="quick-stat-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="quick-stat-number">{{ total_students }}</div>
+            <div class="quick-stat-label">Зарегистрированных студентов</div>
+        </div>
+        
+        <div class="quick-stat">
+            <div class="quick-stat-icon">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div class="quick-stat-number">{{ active_loans }}</div>
+            <div class="quick-stat-label">Активных выдач</div>
+        </div>
+        
+        <div class="quick-stat">
+            <div class="quick-stat-icon">
+                <i class="fas fa-building"></i>
+            </div>
+            <div class="quick-stat-number">{{ total_branches }}</div>
+            <div class="quick-stat-label">Филиалов библиотеки</div>
+        </div>
+        
+        <div class="quick-stat">
+            <div class="quick-stat-icon">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <div class="quick-stat-number">{{ total_authors }}</div>
+            <div class="quick-stat-label">Авторов в системе</div>
+        </div>
+        
+        <div class="quick-stat">
+            <div class="quick-stat-icon">
+                <i class="fas fa-print"></i>
+            </div>
+            <div class="quick-stat-number">{{ total_publishers }}</div>
+            <div class="quick-stat-label">Издательств</div>
+        </div>
+        
+        <div class="quick-stat">
+            <div class="quick-stat-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="quick-stat-number">{{ total_faculties }}</div>
+            <div class="quick-stat-label">Факультетов</div>
+        </div>
+        
+        <div class="quick-stat">
+            <div class="quick-stat-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="quick-stat-number">{{ total_loans }}</div>
+            <div class="quick-stat-label">Всего выдач за всё время</div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="recent-activity">
+                <h4 class="mb-3"><i class="fas fa-clock me-2"></i>Последние выдачи</h4>
+                {% if recent_loans %}
+                    {% for loan in recent_loans %}
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="fw-bold">{{ loan.book.title }}</div>
+                            <div class="text-muted small">Студент: {{ loan.student.get_full_name }}</div>
+                            <div class="activity-time">{{ loan.issue_date|date:"d.m.Y H:i" }}</div>
+                        </div>
+                        <span class="badge {% if loan.is_returned %}bg-success{% else %}bg-warning{% endif %}">
+                            {% if loan.is_returned %}Возвращена{% else %}На руках{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3">Нет данных о последних выдачах</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="recent-activity">
+                <h4 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Статистика филиалов</h4>
+                {% if branch_stats %}
+                    {% for branch in branch_stats %}
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="fw-bold">{{ branch.name }}</div>
+                            <div class="text-muted small">
+                                Книг: {{ branch.book_count }} | 
+                                Активных выдач: {{ branch.active_loans_count }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-3">Нет данных по филиалам</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Additional Information -->
+    <div class="alert alert-info mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-info-circle me-2"></i>О системе отчетности:</h6>
+                <ul class="mb-0">
+                    <li>Данные обновляются в реальном времени</li>
+                    <li>Доступны фильтры по периодам и параметрам</li>
+                    <li>Возможность экспорта в различные форматы</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-clock me-2"></i>Временные периоды:</h6>
+                <ul class="mb-0">
+                    <li>Отчеты доступны за месяц, год и всё время</li>
+                    <li>Возможность сравнения с предыдущими периодами</li>
+                    <li>Автоматическое обновление статистики</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation to quick stats
+    const quickStats = document.querySelectorAll('.quick-stat');
+    quickStats.forEach((stat, index) => {
+        stat.style.animationDelay = `${index * 0.1}s`;
+        stat.classList.add('animate__animated', 'animate__fadeInUp');
+    });
+    
+    // Add animation to report cards
+    const reportCards = document.querySelectorAll('.report-card');
+    reportCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.15}s`;
+        card.classList.add('animate__animated', 'animate__fadeInUp');
+    });
+});
+</script>
+{% endblock %}

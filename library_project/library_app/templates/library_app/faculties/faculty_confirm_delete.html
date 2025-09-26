@@ -1,0 +1,145 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Удалить факультет: {{ faculty.name }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.delete-header {
+    background: linear-gradient(135deg, #fe34486c 0%, #c8233337 100%);
+    border: 1 solid red;
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.confirmation-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+    border-left: 4px solid #dc3545;
+}
+
+.warning-icon {
+    font-size: 4rem;
+    color: #dc3545;
+    margin-bottom: 1.5rem;
+}
+
+.faculty-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid #6c757d;
+}
+
+.consequences-list {
+    background: #fff3cd;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    border-left: 3px solid #ffc107;
+}
+
+.consequences-list ul {
+    margin-bottom: 0;
+}
+
+.consequences-list li {
+    margin-bottom: 0.5rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="delete-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'faculty_list' %}" class="text-white">Факультеты</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'faculty_detail' faculty.pk %}" class="text-white">{{ faculty.name|truncatewords:3 }}</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Удаление</li>
+            </ol>
+        </nav>
+        <h1 class="books-title text-dark">Удаление факультета</h1>
+        <p class="books-subtitle">Подтвердите удаление факультета из системы</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="confirmation-card text-center">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                
+                <h2 class="mb-4">Вы уверены, что хотите удалить этот факультет?</h2>
+                
+                <div class="faculty-info text-start">
+                    <h4>{{ faculty.name }}</h4>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Дата создания:</strong> {{ faculty.created_at|date:"d.m.Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Студентов:</strong> {{ faculty.students.count }}</p>
+                            <p class="mb-0"><strong>Использований книг:</strong> {{ faculty.book_usage.count }}</p>
+                        </div>
+                    </div>
+                    {% if faculty.description %}
+                    <div class="mt-3">
+                        <p class="mb-1"><strong>Описание:</strong></p>
+                        <p class="mb-0">{{ faculty.description|truncatewords:20 }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="consequences-list text-start">
+                    <h5 class="text-warning"><i class="fas fa-exclamation-circle me-2"></i>Важные последствия:</h5>
+                    <ul>
+                        <li>Факультет будет полностью удален из системы</li>
+                        <li>Все связанные студенты останутся в системе, но будут без привязки к факультету</li>
+                        <li>Данные об использовании книг факультетом будут удалены</li>
+                        <li>Это действие нельзя отменить</li>
+                    </ul>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="action-buttons">
+                        <a href="{% url 'faculty_detail' faculty.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Отмена
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Да, удалить факультет
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

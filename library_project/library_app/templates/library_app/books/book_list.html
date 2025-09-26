@@ -1,0 +1,342 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Список книг - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Book List Styles */
+.books-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.books-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.books-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.search-section {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.filter-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.filter-card:hover {
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.15);
+    border-color: var(--secondary-color);
+}
+
+.book-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.book-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(68, 122, 176, 0.15);
+    border-color: var(--secondary-color);
+}
+
+.book-cover {
+    height: 200px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--secondary-color);
+    font-size: 3rem;
+}
+
+.book-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.book-authors {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+}
+
+.book-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.book-year {
+    color: var(--secondary-color);
+    font-weight: 500;
+}
+
+.book-pages {
+    color: #6c757d;
+}
+
+.book-publisher {
+    color: #495057;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.book-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.book-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Pagination */
+.pagination-container {
+    margin-top: 2rem;
+}
+
+.stats-badge {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+    border: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+    .books-title {
+        font-size: 2rem;
+    }
+    
+    .book-actions {
+        flex-direction: column;
+    }
+    
+    .book-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="books-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="books-title">Каталог книг</h1>
+                <p class="books-subtitle">Полный перечень литературы в библиотечной системе</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="stats-badge d-inline-block">
+                    <i class="fas fa-book me-1"></i> Всего: {{ books.paginator.count }} книг
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Search and Filters Section -->
+    <div class="search-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="search" class="form-label">Поиск по названию или автору</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Введите название книги или автора...">
+            </div>
+            <div class="col-md-3">
+                <label for="year" class="form-label">Год издания</label>
+                <input type="number" class="form-control" id="year" name="year" 
+                       value="{{ year_filter }}" placeholder="Год издания" min="1000" max="2100">
+            </div>
+            <div class="col-md-3">
+                <label for="publisher" class="form-label">Издательство</label>
+                <select class="form-select" id="publisher" name="publisher">
+                    <option value="">Все издательства</option>
+                    {% for publisher in publishers %}
+                    <option value="{{ publisher.id }}" {% if publisher_filter == publisher.id|stringformat:"s" %}selected{% endif %}>
+                        {{ publisher.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Найти
+                    </button>
+                    <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Сбросить
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'book_add' %}" class="btn btn-success ms-auto">
+                        <i class="fas fa-plus me-2"></i>Добавить книгу
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Books Grid -->
+    <div class="row">
+        {% for book in books %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="book-card">
+                <div class="book-cover">
+                    <i class="fas fa-book"></i>
+                </div>
+                
+                <h3 class="book-title">{{ book.title }}</h3>
+                
+                <div class="book-authors">
+                    <i class="fas fa-user-edit me-1"></i>
+                    {% for author in book.authors.all|slice:":3" %}
+                        {{ author }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    {% if book.authors.count > 3 %}...{% endif %}
+                </div>
+                
+                <div class="book-meta">
+                    <span class="book-year">{{ book.publication_year }} г.</span>
+                    <span class="book-pages">{{ book.page_count }} стр.</span>
+                </div>
+                
+                {% if book.publisher %}
+                <div class="book-publisher">
+                    <i class="fas fa-building me-1"></i>{{ book.publisher.name }}
+                </div>
+                {% endif %}
+                
+                <div class="book-price">{{ book.price }} ₽</div>
+                
+                <div class="book-actions">
+                    <a href="{% url 'book_detail' book.pk %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>Подробнее
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'book_edit' book.pk %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-edit me-1"></i>Редактировать
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Книги не найдены</h4>
+                <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                <a href="{% url 'book_list' %}" class="btn btn-primary mt-2">
+                    <i class="fas fa-redo me-2"></i>Показать все книги
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if books.has_other_pages %}
+    <div class="pagination-container">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if books.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ books.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if year_filter %}&year={{ year_filter }}{% endif %}{% if publisher_filter %}&publisher={{ publisher_filter }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+
+                {% for i in books.paginator.page_range %}
+                    {% if books.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if year_filter %}&year={{ year_filter }}{% endif %}{% if publisher_filter %}&publisher={{ publisher_filter }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if books.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ books.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if year_filter %}&year={{ year_filter }}{% endif %}{% if publisher_filter %}&publisher={{ publisher_filter }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="text-center text-muted mt-2">
+            Страница {{ books.number }} из {{ books.paginator.num_pages }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit filter form when year or publisher changes
+    const yearInput = document.getElementById('year');
+    const publisherSelect = document.getElementById('publisher');
+    
+    if (yearInput) {
+        yearInput.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    }
+    
+    if (publisherSelect) {
+        publisherSelect.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    }
+});
+</script>
+{% endblock %}

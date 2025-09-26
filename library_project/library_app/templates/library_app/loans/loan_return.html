@@ -1,0 +1,158 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Возврат книги: {{ loan }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.return-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.confirmation-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.1);
+    border-left: 4px solid #28a745;
+}
+
+.success-icon {
+    font-size: 4rem;
+    color: #28a745;
+    margin-bottom: 1.5rem;
+}
+
+.loan-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid #6c757d;
+}
+
+.duration-info {
+    background: #e9ecef;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.duration-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.duration-label {
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+.overdue-warning {
+    background-color: #f8d7da;
+    color: #842029;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid #dc3545;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="return-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'loan_list' %}" class="text-white">Выдачи</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'loan_detail' loan.pk %}" class="text-white">Детали выдачи</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Возврат книги</li>
+            </ol>
+        </nav>
+        <h1 class="books-title text-light">Возврат книги</h1>
+        <p class="books-subtitle">Подтвердите возврат книги в библиотеку</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="confirmation-card text-center">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                
+                <h2 class="mb-4">Подтвердите возврат книги</h2>
+                
+                <div class="loan-info text-start">
+                    <h4>Информация о выдаче</h4>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Книга:</strong> {{ loan.book.title }}</p>
+                            <p class="mb-1"><strong>Студент:</strong> {{ loan.student.last_name }} {{ loan.student.first_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Филиал:</strong> {{ loan.branch.name }}</p>
+                            <p class="mb-1"><strong>Дата выдачи:</strong> {{ loan.issue_date|date:"d.m.Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Duration Information -->
+                <div class="duration-info">
+                    <div class="duration-number">{{ loan.issue_date|timesince }}</div>
+                    <div class="duration-label">Книга находилась у студента</div>
+                </div>
+                
+                <!-- Overdue Warning -->
+                {% if is_overdue %}
+                <div class="overdue-warning text-start">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Книга просрочена!</h5>
+                    <p class="mb-0">
+                        Книга должна была быть возвращена в течение 30 дней. 
+                        Просрочена на {{ overdue_days }} дней.
+                    </p>
+                </div>
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="action-buttons">
+                        <a href="{% url 'loan_detail' loan.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Отмена
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-2"></i>Подтвердить возврат
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

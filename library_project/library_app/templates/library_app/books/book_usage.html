@@ -1,0 +1,239 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Использование книги: {{ book.title }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.usage-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+}
+
+.chart-container {
+    height: 300px;
+    margin: 2rem 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    border-left: 4px solid var(--secondary-color);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.usage-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.usage-table th,
+.usage-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.usage-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.usage-table tr:hover {
+    background: #f8f9fa;
+}
+
+.progress {
+    height: 8px;
+    background: #e9ecef;
+}
+
+.progress-bar {
+    background: var(--secondary-color);
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.no-data i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="usage-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'book_list' %}" class="text-white">Книги</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'book_detail' book.pk %}" class="text-white">{{ book.title|truncatewords:3 }}</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Статистика использования</li>
+            </ol>
+        </nav>
+        <h1 class="books-title">Статистика использования</h1>
+        <p class="books-subtitle">Анализ использования книги "{{ book.title }}" по факультетам</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="stats-card">
+                <h2 class="section-title">Распределение по факультетам</h2>
+                
+                {% if usage_stats %}
+                <div class="table-responsive">
+                    <table class="usage-table">
+                        <thead>
+                            <tr>
+                                <th>Факультет</th>
+                                <th>Количество использований</th>
+                                <th>Доля</th>
+                                <th>Процент</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in usage_stats %}
+                            <tr>
+                                <td>{{ stat.faculty__name }}</td>
+                                <td>{{ stat.usage_count }}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ stat.percentage }}%"></div>
+                                    </div>
+                                </td>
+                                <td>{{ stat.percentage|floatformat:1 }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="no-data">
+                    <i class="fas fa-chart-pie"></i>
+                    <h4>Нет данных об использовании</h4>
+                    <p>Эта книга еще не использовалась факультетами</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Summary Statistics -->
+            <div class="stats-card">
+                <h2 class="section-title">Сводка</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ total_usage|default:0 }}</div>
+                        <div class="stat-label">Всего использований</div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-number">{{ usage_stats|length|default:0 }}</div>
+                        <div class="stat-label">Факультетов использовали</div>
+                    </div>
+                </div>
+                
+                {% if most_used_faculty %}
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-trophy me-2"></i>Наиболее активный факультет</h5>
+                    <p class="mb-0">{{ most_used_faculty }}</p>
+                </div>
+                {% endif %}
+                
+                {% if usage_stats %}
+                <div class="mt-3">
+                    <h5>Распределение использования:</h5>
+                    <ul class="list-group">
+                        {% for stat in usage_stats|slice:":5" %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ stat.faculty__name|truncatewords:2 }}
+                            <span class="badge bg-primary rounded-pill">{{ stat.usage_count }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Actions -->
+            <div class="stats-card">
+                <h2 class="section-title">Действия</h2>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'book_detail' book.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Назад к книге
+                    </a>
+                    <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-book me-2"></i>Все книги
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple chart animation
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => {
+            bar.style.transition = 'width 1s ease-in-out';
+            bar.style.width = width;
+        }, 100);
+    });
+});
+</script>
+{% endblock %}

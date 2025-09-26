@@ -1,0 +1,152 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Удалить издательство: {{ publisher.name }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.delete-header {
+    background: linear-gradient(135deg, #fe34486c 0%, #c8233337 100%);
+    border: 1 solid red;
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.confirmation-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+    border-left: 4px solid #dc3545;
+}
+
+.warning-icon {
+    font-size: 4rem;
+    color: #dc3545;
+    margin-bottom: 1.5rem;
+}
+
+.publisher-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid #6c757d;
+}
+
+.consequences-list {
+    background: #fff3cd;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    border-left: 3px solid #ffc107;
+}
+
+.consequences-list ul {
+    margin-bottom: 0;
+}
+
+.consequences-list li {
+    margin-bottom: 0.5rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.publisher-icon {
+    height: 100px;
+    width: 100px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--secondary-color);
+    font-size: 2.5rem;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="delete-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'publisher_list' %}" class="text-white">Издательства</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'publisher_detail' publisher.pk %}" class="text-white">{{ publisher.name|truncatewords:2 }}</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Удаление</li>
+            </ol>
+        </nav>
+        <h1 class="books-title text-dark">Удаление издательства</h1>
+        <p class="books-subtitle">Подтвердите удаление издательства из системы</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="confirmation-card text-center">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                
+                <h2 class="mb-4">Вы уверены, что хотите удалить это издательство?</h2>
+                
+                <div class="publisher-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                
+                <div class="publisher-info text-start">
+                    <h4>{{ publisher.name }}</h4>
+                    {% if publisher.address %}
+                    <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i>{{ publisher.address|truncatewords:10 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="consequences-list text-start">
+                    <h5 class="text-warning"><i class="fas fa-exclamation-circle me-2"></i>Важные последствия:</h5>
+                    <ul>
+                        <li>Издательство будет полностью удалено из системы</li>
+                        <li>Все книги этого издательства останутся в системе, но связь с издательством будет потеряна</li>
+                        <li>Это действие нельзя отменить</li>
+                        {% if books_count > 0 %}
+                        <li class="text-danger"><strong>Внимание:</strong> У этого издательства {{ books_count }} книг в системе!</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="action-buttons">
+                        <a href="{% url 'publisher_detail' publisher.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Отмена
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Да, удалить издательство
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

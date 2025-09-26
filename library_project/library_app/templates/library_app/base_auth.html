@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Библиотечная система - Авторизация{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{% static 'library_app/css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'library_app/css/auth.css' %}" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card-wrapper">
+            <div class="auth-card">
+                <!-- Auth Header -->
+                <div class="auth-header text-center mb-4">
+                    <a href="{% url 'home' %}" class="auth-logo">
+                        <i class="fas fa-book-open me-2"></i>
+                        <span>Библиотечная система</span>
+                    </a>
+                    <h2 class="auth-title">{% block auth_title %}{% endblock %}</h2>
+                    <p class="auth-subtitle">{% block auth_subtitle %}{% endblock %}</p>
+                </div>
+                
+                <!-- Messages -->
+                {% if messages %}
+                <div class="auth-messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Form Errors -->
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Ошибка!</strong> Пожалуйста, исправьте ошибки ниже.
+                    {% if form.non_field_errors %}
+                    <ul class="mb-0 mt-2">
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Content -->
+                <div class="auth-content">
+                    {% block auth_content %}{% endblock %}
+                </div>
+                
+                <!-- Auth Footer -->
+                <div class="auth-footer text-center mt-4">
+                    {% block auth_footer %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

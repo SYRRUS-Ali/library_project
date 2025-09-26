@@ -1,0 +1,319 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Список студентов - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Student List Styles */
+.students-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.students-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.students-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.search-section {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.student-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.student-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(68, 122, 176, 0.15);
+    border-color: var(--secondary-color);
+}
+
+.student-avatar {
+    height: 100px;
+    width: 100px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--secondary-color);
+    font-size: 2.5rem;
+}
+
+.student-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.student-id {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.student-faculty {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.student-meta {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.student-stat {
+    text-align: center;
+}
+
+.student-stat-number {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.student-stat-label {
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+.student-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.stats-badge {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+    border: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+    .students-title {
+        font-size: 2rem;
+    }
+    
+    .student-actions {
+        flex-direction: column;
+    }
+    
+    .student-actions .btn {
+        width: 100%;
+    }
+    
+    .student-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="students-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="students-title text-light">Студенты</h1>
+                <p class="students-subtitle">Все студенты библиотечной системы</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="stats-badge d-inline-block">
+                    <i class="fas fa-user-graduate me-1"></i> Всего: {{ students.paginator.count }} студентов
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Search Section -->
+    <div class="search-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-5">
+                <label for="search" class="form-label">Поиск по имени или ID</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Введите ФИО или номер студенческого...">
+            </div>
+            <div class="col-md-4">
+                <label for="faculty" class="form-label">Факультет</label>
+                <select class="form-select" id="faculty" name="faculty">
+                    <option value="">Все факультеты</option>
+                    {% for faculty in faculties %}
+                    <option value="{{ faculty.id }}" {% if faculty_filter == faculty.id|stringformat:"s" %}selected{% endif %}>
+                        {{ faculty.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <div class="d-flex gap-2 w-100">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Найти
+                    </button>
+                    <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Сбросить
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Students Grid -->
+    <div class="row">
+        {% for student in students %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="student-card">
+                <div class="student-avatar">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                
+                <h3 class="student-name">{{ student.last_name }} {{ student.first_name }}</h3>
+                
+                <div class="student-id">
+                    <i class="fas fa-id-card me-1"></i>{{ student.student_id }}
+                </div>
+                
+                <div class="student-faculty">
+                    <i class="fas fa-graduation-cap me-1"></i>{{ student.faculty.name }}
+                </div>
+                
+                <div class="student-meta">
+                    <div class="student-stat">
+                        <div class="student-stat-number">{{ student.loans.count }}</div>
+                        <div class="student-stat-label">Всего выдач</div>
+                    </div>
+                    <div class="student-stat">
+                        <div class="student-stat-label">Активных</div>
+                    </div>
+                </div>
+                
+                <div class="student-actions">
+                    <a href="{% url 'student_detail' student.pk %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>Подробнее
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'student_edit' student.pk %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-edit me-1"></i>Редактировать
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Студенты не найдены</h4>
+                <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                <a href="{% url 'student_list' %}" class="btn btn-primary mt-2">
+                    <i class="fas fa-redo me-2"></i>Показать всех студентов
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if students.has_other_pages %}
+    <div class="pagination-container">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if students.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ students.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if faculty_filter %}&faculty={{ faculty_filter }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+
+                {% for i in students.paginator.page_range %}
+                    {% if students.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if faculty_filter %}&faculty={{ faculty_filter }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if students.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ students.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if faculty_filter %}&faculty={{ faculty_filter }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="text-center text-muted mt-2">
+            Страница {{ students.number }} из {{ students.paginator.num_pages }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if user.is_staff %}
+    <div class="text-center mt-4">
+        <a href="{% url 'student_add' %}" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>Добавить нового студента
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit filter form when faculty changes
+    const facultySelect = document.getElementById('faculty');
+    
+    if (facultySelect) {
+        facultySelect.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    }
+});
+</script>
+{% endblock %}

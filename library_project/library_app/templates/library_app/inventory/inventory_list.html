@@ -1,0 +1,405 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Управление инвентарем - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.inventory-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 3rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.inventory-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.inventory-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.search-section {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.inventory-table {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.1);
+    margin-bottom: 2rem;
+}
+
+.table th {
+    background: #f8f9fa;
+    border-top: none;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+}
+
+.low-stock {
+    background-color: #fff5f5;
+}
+
+.low-stock:hover {
+    background-color: #ffeaea !important;
+}
+
+.out-of-stock {
+    background-color: #fff5f5;
+    border-left: 4px solid #dc3545;
+}
+
+.book-cover {
+    width: 40px;
+    height: 50px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-color);
+}
+
+.stock-indicator {
+    width: 100px;
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 0.25rem 0;
+}
+
+.stock-level {
+    height: 100%;
+    background: #28a745;
+    transition: width 0.3s ease;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.1);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.quick-actions {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+    .inventory-title {
+        font-size: 2rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="inventory-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="inventory-title text-light">Управление инвентарем</h1>
+                <p class="inventory-subtitle">Учет книг во всех филиалах библиотеки</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="stats-badge d-inline-block">
+                    <i class="fas fa-boxes me-1"></i> {{ inventory.paginator.count }} записей
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Search Section -->
+    <div class="search-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="branch" class="form-label">Филиал</label>
+                <select class="form-select" id="branch" name="branch">
+                    <option value="">Все филиалы</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}" {% if branch_filter == branch.id|stringformat:"s" %}selected{% endif %}>
+                        {{ branch.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="book" class="form-label">Книга</label>
+                <input type="text" class="form-control" id="book" name="book" 
+                       value="{{ book_filter }}" placeholder="Название книги...">
+            </div>
+            
+            <div class="col-md-4 d-flex align-items-end">
+                <div class="d-flex gap-2 w-100">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Найти
+                    </button>
+                    <a href="{% url 'inventory_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Сбросить
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Quick Actions -->
+    {% if user.is_staff %}
+    <div class="quick-actions">
+        <h5 class="mb-3"><i class="fas fa-bolt me-2"></i>Быстрые действия</h5>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'inventory_add' %}" class="btn btn-outline-primary">
+                <i class="fas fa-plus me-2"></i>Добавить запись
+            </a>
+            <a href="{% url 'inventory_query' %}" class="btn btn-outline-info">
+                <i class="fas fa-search me-2"></i>Расширенный поиск
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Inventory Table -->
+    <div class="inventory-table">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Книга</th>
+                        <th scope="col">Филиал</th>
+                        <th scope="col" class="text-center">Всего</th>
+                        <th scope="col" class="text-center">Доступно</th>
+                        <th scope="col" class="text-center">Статус</th>
+                        <th scope="col" class="text-center">Запас</th>
+                        <th scope="col" class="text-center">Обновлено</th>
+                        {% if user.is_staff %}
+                        <th scope="col" class="text-center">Действия</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in inventory %}
+                    <tr class="{% if item.available_copies == 0 %}out-of-stock{% elif item.available_copies <= item.total_copies|divisibleby:4 %}low-stock{% endif %}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="book-cover me-3">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div>
+                                    <strong>{{ item.book.title }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ item.book.authors.all|join:", "|truncatewords:3 }}
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <strong>{{ item.branch.name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ item.branch.address|truncatewords:3 }}</small>
+                        </td>
+                        <td class="text-center">
+                            <span class="fw-bold">{{ item.total_copies }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="fw-bold {% if item.available_copies == 0 %}text-danger{% elif item.available_copies <= item.total_copies|divisibleby:4 %}text-warning{% else %}text-success{% endif %}">
+                                {{ item.available_copies }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            {% if item.available_copies == 0 %}
+                            <span class="badge bg-danger status-badge">Нет в наличии</span>
+                            {% elif item.available_copies <= item.total_copies|divisibleby:4 %}
+                            <span class="badge bg-warning status-badge">Мало</span>
+                            {% else %}
+                            <span class="badge bg-success status-badge">В наличии</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="stock-indicator">
+                                <div class="stock-level" style="width: {% widthratio item.available_copies item.total_copies 100 %}%"></div>
+                            </div>
+                            <small class="text-muted">
+                                {% widthratio item.available_copies item.total_copies 100 %}%
+                            </small>
+                        </td>
+                        <td class="text-center">
+                            <small class="text-muted">{{ item.last_updated|date:"d.m.Y" }}</small>
+                        </td>
+                        {% if user.is_staff %}
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'inventory_edit' item.pk %}" class="btn btn-outline-secondary" title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="btn btn-outline-info" title="История движений">
+                                    <i class="fas fa-history"></i>
+                                </a>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{% if user.is_staff %}8{% else %}7{% endif %}" class="text-center py-4">
+                            <i class="fas fa-box-open fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">Записи инвентаря не найдены</p>
+                            {% if user.is_staff %}
+                            <a href="{% url 'inventory_add' %}" class="btn btn-primary mt-2">
+                                <i class="fas fa-plus me-2"></i>Добавить первую запись
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if inventory.has_other_pages %}
+    <div class="pagination-container">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if inventory.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ inventory.previous_page_number }}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if book_filter %}&book={{ book_filter }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+
+                {% for i in inventory.paginator.page_range %}
+                    {% if inventory.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if book_filter %}&book={{ book_filter }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if inventory.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ inventory.next_page_number }}{% if branch_filter %}&branch={{ branch_filter }}{% endif %}{% if book_filter %}&book={{ book_filter }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="text-center text-muted mt-2">
+            Страница {{ inventory.number }} из {{ inventory.paginator.num_pages }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Alerts Section -->
+    {% if low_stock_count > 0 or out_of_stock_count > 0 %}
+    <div class="alert alert-warning mt-4">
+        <h5><i class="fas fa-exclamation-triangle me-2"></i>Внимание!</h5>
+        <ul class="mb-0">
+            {% if out_of_stock_count > 0 %}
+            <li>Книг нет в наличии: <strong>{{ out_of_stock_count }}</strong></li>
+            {% endif %}
+            {% if low_stock_count > 0 %}
+            <li>Книг с низким запасом: <strong>{{ low_stock_count }}</strong></li>
+            {% endif %}
+        </ul>
+        {% if user.is_staff %}
+        <div class="mt-2">
+            <a href="#" class="btn btn-sm btn-warning">
+                <i class="fas fa-list me-1"></i>Показать проблемные позиции
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit filter form when branch changes
+    const branchSelect = document.getElementById('branch');
+    
+    if (branchSelect) {
+        branchSelect.addEventListener('change', function() {
+            this.closest('form').submit();
+        });
+    }
+    
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

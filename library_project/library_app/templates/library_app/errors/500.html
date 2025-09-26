@@ -1,0 +1,206 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Ошибка сервера - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.error-header {
+    background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+    padding: 4rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.error-icon {
+    font-size: 6rem;
+    margin-bottom: 2rem;
+    color: #a29bfe;
+}
+
+.error-content {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.error-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.error-subtitle {
+    font-size: 1.5rem;
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+}
+
+.error-description {
+    font-size: 1.1rem;
+    color: #34495e;
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-code {
+    font-size: 8rem;
+    font-weight: 900;
+    color: #f1f2f6;
+    position: absolute;
+    z-index: -1;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.technical-info {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin: 3rem 0;
+    text-align: left;
+}
+
+.technical-info h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.technical-info pre {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    overflow-x: auto;
+    font-size: 0.9rem;
+}
+
+.contact-info {
+    background: #e8f4fd;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin: 2rem 0;
+    border-left: 4px solid #3498db;
+}
+
+.contact-info h5 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .error-title {
+        font-size: 2rem;
+    }
+    
+    .error-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .error-actions .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+    
+    .error-code {
+        font-size: 5rem;
+    }
+    
+    .technical-info pre {
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-header">
+    <div class="container text-center">
+        <h1 class="error-title text-light">500</h1>
+        <p class="error-subtitle text-light">Ошибка сервера</p>
+    </div>
+</div>
+
+<div class="container position-relative">
+    <div class="error-code">500</div>
+    
+    <div class="error-content">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h2 class="error-title">Внутренняя ошибка сервера</h2>
+        
+        <p class="error-subtitle">Произошла непредвиденная ошибка на сервере</p>
+        
+        <div class="error-description">
+            <p>При обработке вашего запроса произошла внутренняя ошибка сервера. 
+            Наша команда уже уведомлена о проблеме и работает над ее решением.</p>
+            
+            <p>Пожалуйста, попробуйте повторить запрос позже или перейти на другую страницу.</p>
+        </div>
+        
+        <div class="error-actions">
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-home me-2"></i>На главную
+            </a>
+            
+            <a href="javascript:location.reload()" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-redo me-2"></i>Обновить страницу
+            </a>
+            
+            <a href="{% url 'book_list' %}" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-book me-2"></i>К каталогу книг
+            </a>
+        </div>
+    </div>
+    
+    <!-- Contact Information -->
+    <div class="contact-info">
+        <h5><i class="fas fa-life-ring me-2"></i>Нужна помощь?</h5>
+        <p class="mb-0">Если проблема повторяется, пожалуйста, свяжитесь с технической поддержкой библиотечной системы.</p>
+    </div>
+    
+    <!-- Technical Information (only shown in debug mode) -->
+    {% if debug %}
+    <div class="technical-info">
+        <h4><i class="fas fa-bug me-2"></i>Техническая информация</h4>
+        <pre>{{ exception }}</pre>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add automatic retry functionality
+    const retryButton = document.querySelector('.btn-outline-primary');
+    if (retryButton) {
+        retryButton.addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Попытка подключения...';
+            this.disabled = true;
+            
+            setTimeout(function() {
+                location.reload();
+            }, 2000);
+        });
+    }
+});
+</script>
+{% endblock %}

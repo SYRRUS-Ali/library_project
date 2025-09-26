@@ -1,0 +1,213 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}Страница не найдена - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.error-header {
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    padding: 4rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.error-icon {
+    font-size: 6rem;
+    margin-bottom: 2rem;
+    color: #74b9ff;
+}
+
+.error-content {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.error-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.error-subtitle {
+    font-size: 1.5rem;
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+}
+
+.error-description {
+    font-size: 1.1rem;
+    color: #34495e;
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-code {
+    font-size: 8rem;
+    font-weight: 900;
+    color: #f1f2f6;
+    position: absolute;
+    z-index: -1;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.search-box {
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+.quick-links {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 1rem;
+    margin: 3rem 0;
+}
+
+.quick-links h4 {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+}
+
+.link-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.link-item {
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.link-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(116, 185, 255, 0.15);
+    border-color: #74b9ff;
+}
+
+.link-item i {
+    font-size: 2rem;
+    color: #74b9ff;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .error-title {
+        font-size: 2rem;
+    }
+    
+    .error-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .error-actions .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+    
+    .error-code {
+        font-size: 5rem;
+    }
+    
+    .link-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-header">
+    <div class="container text-center">
+        <h1 class="error-title text-light">404</h1>
+        <p class="error-subtitle text-light">Страница не найдена</p>
+    </div>
+</div>
+
+<div class="container position-relative">
+    <div class="error-code">404</div>
+    
+    <div class="error-content">
+        <div class="error-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        
+        <h2 class="error-title">Страница не найдена</h2>
+        
+        <p class="error-subtitle">Запрашиваемая страница не существует или была перемещена</p>
+        
+        <div class="error-description">
+            <p>Возможно, вы ввели неправильный адрес или страница была удалена. 
+            Попробуйте воспользоваться поиском или перейти на одну из основных страниц сайта.</p>
+        </div>
+        
+        <!-- Search Box -->
+        <div class="search-box">
+            <form action="{% url 'book_list' %}" method="get" class="d-flex">
+                <input type="text" name="search" class="form-control form-control-lg me-2" 
+                       placeholder="Поиск книг..." aria-label="Поиск">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        
+        <div class="error-actions">
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-home me-2"></i>На главную
+            </a>
+            
+            <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Назад
+            </a>
+        </div>
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="quick-links">
+        <h4 class="text-center">Популярные разделы</h4>
+        <div class="link-grid">
+            <a href="{% url 'book_list' %}" class="link-item text-decoration-none">
+                <i class="fas fa-book"></i>
+                <div>Каталог книг</div>
+            </a>
+            
+            <a href="{% url 'author_list' %}" class="link-item text-decoration-none">
+                <i class="fas fa-user-edit"></i>
+                <div>Авторы</div>
+            </a>
+            
+            <a href="{% url 'branch_list' %}" class="link-item text-decoration-none">
+                <i class="fas fa-building"></i>
+                <div>Филиалы</div>
+            </a>
+            
+            <a href="{% url 'faculty_list' %}" class="link-item text-decoration-none">
+                <i class="fas fa-graduation-cap"></i>
+                <div>Факультеты</div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

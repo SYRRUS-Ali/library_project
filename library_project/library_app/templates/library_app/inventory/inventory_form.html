@@ -1,0 +1,467 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Инвентарь - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 2rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.form-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.1);
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+.required-field::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.help-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.form-actions {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-top: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.preview-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    border-left: 3px solid var(--secondary-color);
+}
+
+.preview-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.preview-item:last-child {
+    margin-bottom: 0;
+}
+
+.preview-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+}
+
+.preview-info {
+    flex-grow: 1;
+}
+
+.preview-title {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.preview-details {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.stock-warning {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .form-card {
+        padding: 1.5rem;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-actions .d-flex {
+        flex-direction: column;
+    }
+    
+    .preview-item {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="form-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'inventory_list' %}" class="text-white">Инвентарь</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">{{ title }}</li>
+            </ol>
+        </nav>
+        <h1 class="books-title text-light">{{ title }}</h1>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form method="post" class="form-card" novalidate>
+                {% csrf_token %}
+                
+                <!-- Book Selection Section -->
+                <div class="form-section">
+                    <h2 class="section-title">Выбор книги</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ form.book.id_for_label }}" class="form-label required-field">Книга</label>
+                            {{ form.book }}
+                            {% if form.book.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.book.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="help-text">Выберите книгу из каталога</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Branch Selection Section -->
+                <div class="form-section">
+                    <h2 class="section-title">Выбор филиала</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ form.branch.id_for_label }}" class="form-label required-field">Филиал</label>
+                            {{ form.branch }}
+                            {% if form.branch.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.branch.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="help-text">Выберите филиал библиотеки</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stock Information Section -->
+                <div class="form-section">
+                    <h2 class="section-title">Информация о запасах</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.total_copies.id_for_label }}" class="form-label required-field">Общее количество экземпляров</label>
+                            {{ form.total_copies }}
+                            {% if form.total_copies.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.total_copies.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="help-text">Общее количество книг в филиале</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.available_copies.id_for_label }}" class="form-label required-field">Доступное количество</label>
+                            {{ form.available_copies }}
+                            {% if form.available_copies.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.available_copies.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="help-text">Количество книг доступных для выдачи</div>
+                        </div>
+                    </div>
+                    
+                    {% if form.total_copies.value and form.available_copies.value %}
+                    {% with total=form.total_copies.value available=form.available_copies.value %}
+                    {% if available > total %}
+                    <div class="stock-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Внимание:</strong> Доступное количество не может превышать общее количество экземпляров.
+                    </div>
+                    {% elif available == 0 %}
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Книга будет отмечена как отсутствующая в наличии.
+                    </div>
+                    {% elif available <= total|divisibleby:4 %}
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Низкий запас книги. Рекомендуется пополнить инвентарь.
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    {% endif %}
+                </div>
+                
+                <!-- Preview -->
+                <div class="preview-card">
+                    <h4>Предпросмотр:</h4>
+                    
+                    <div class="preview-item">
+                        <div class="preview-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="preview-info">
+                            <div class="preview-title" id="book-preview">
+                                {% if object and object.book %}
+                                    {{ object.book.title }}
+                                {% else %}
+                                    [Название книги]
+                                {% endif %}
+                            </div>
+                            <div class="preview-details" id="authors-preview">
+                                {% if object and object.book %}
+                                    {{ object.book.authors.all|join:", " }}
+                                {% else %}
+                                    [Авторы]
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-item">
+                        <div class="preview-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="preview-info">
+                            <div class="preview-title" id="branch-preview">
+                                {% if object and object.branch %}
+                                    {{ object.branch.name }}
+                                {% else %}
+                                    [Название филиала]
+                                {% endif %}
+                            </div>
+                            <div class="preview-details" id="address-preview">
+                                {% if object and object.branch %}
+                                    {{ object.branch.address|truncatewords:5 }}
+                                {% else %}
+                                    [Адрес филиала]
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-item">
+                        <div class="preview-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="preview-info">
+                            <div class="preview-title" id="stock-preview">
+                                {% if object %}
+                                    {{ object.available_copies }} / {{ object.total_copies }} экземпляров
+                                {% else %}
+                                    [0] / [0] экземпляров
+                                {% endif %}
+                            </div>
+                            <div class="preview-details" id="status-preview">
+                                {% if object %}
+                                    {% if object.available_copies == 0 %}
+                                    <span class="text-danger">Нет в наличии</span>
+                                    {% elif object.available_copies <= object.total_copies|divisibleby:4 %}
+                                    <span class="text-warning">Низкий запас</span>
+                                    {% else %}
+                                    <span class="text-success">В наличии</span>
+                                    {% endif %}
+                                {% else %}
+                                    [Статус]
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted">Поля, помеченные *, обязательны для заполнения</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% if object %}{% url 'inventory_list' %}{% else %}{% url 'inventory_list' %}{% endif %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Сохранить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update preview in real-time
+    const bookSelect = document.getElementById('{{ form.book.id_for_label }}');
+    const branchSelect = document.getElementById('{{ form.branch.id_for_label }}');
+    const totalCopiesInput = document.getElementById('{{ form.total_copies.id_for_label }}');
+    const availableCopiesInput = document.getElementById('{{ form.available_copies.id_for_label }}');
+    
+    const bookPreview = document.getElementById('book-preview');
+    const authorsPreview = document.getElementById('authors-preview');
+    const branchPreview = document.getElementById('branch-preview');
+    const addressPreview = document.getElementById('address-preview');
+    const stockPreview = document.getElementById('stock-preview');
+    const statusPreview = document.getElementById('status-preview');
+    
+    // Sample data for preview (in real app, this would come from AJAX)
+    const booksData = {
+        {% for book in form.book.field.queryset %}
+        '{{ book.id }}': {
+            title: '{{ book.title|escapejs }}',
+            authors: '{{ book.authors.all|join:", "|escapejs }}'
+        },
+        {% endfor %}
+    };
+    
+    const branchesData = {
+        {% for branch in form.branch.field.queryset %}
+        '{{ branch.id }}': {
+            name: '{{ branch.name|escapejs }}',
+            address: '{{ branch.address|escapejs }}'
+        },
+        {% endfor %}
+    };
+    
+    function updatePreview() {
+        // Update book info
+        const bookId = bookSelect.value;
+        if (bookId && booksData[bookId]) {
+            bookPreview.textContent = booksData[bookId].title;
+            authorsPreview.textContent = booksData[bookId].authors;
+        } else {
+            bookPreview.textContent = '[Название книги]';
+            authorsPreview.textContent = '[Авторы]';
+        }
+        
+        // Update branch info
+        const branchId = branchSelect.value;
+        if (branchId && branchesData[branchId]) {
+            branchPreview.textContent = branchesData[branchId].name;
+            addressPreview.textContent = branchesData[branchId].address;
+        } else {
+            branchPreview.textContent = '[Название филиала]';
+            addressPreview.textContent = '[Адрес филиала]';
+        }
+        
+        // Update stock info
+        const total = totalCopiesInput.value || '0';
+        const available = availableCopiesInput.value || '0';
+        stockPreview.textContent = `${available} / ${total} экземпляров`;
+        
+        // Update status
+        const totalNum = parseInt(total);
+        const availableNum = parseInt(available);
+        
+        if (availableNum === 0) {
+            statusPreview.innerHTML = '<span class="text-danger">Нет в наличии</span>';
+        } else if (availableNum <= totalNum / 4) {
+            statusPreview.innerHTML = '<span class="text-warning">Низкий запас</span>';
+        } else {
+            statusPreview.innerHTML = '<span class="text-success">В наличии</span>';
+        }
+    }
+    
+    // Add event listeners
+    if (bookSelect) bookSelect.addEventListener('change', updatePreview);
+    if (branchSelect) branchSelect.addEventListener('change', updatePreview);
+    if (totalCopiesInput) totalCopiesInput.addEventListener('input', updatePreview);
+    if (availableCopiesInput) availableCopiesInput.addEventListener('input', updatePreview);
+    
+    // Initial update
+    updatePreview();
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        // Validate stock numbers
+        const total = parseInt(totalCopiesInput.value);
+        const available = parseInt(availableCopiesInput.value);
+        
+        if (available > total) {
+            isValid = false;
+            availableCopiesInput.classList.add('is-invalid');
+            document.getElementById('available_copies_errors').textContent = 
+                'Доступное количество не может превышать общее количество';
+        } else {
+            availableCopiesInput.classList.remove('is-invalid');
+        }
+        
+        if (!isValid) {
+            event.preventDefault();
+            // Scroll to first error
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

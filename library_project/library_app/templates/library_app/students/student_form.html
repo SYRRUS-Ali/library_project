@@ -1,0 +1,303 @@
+{% extends 'library_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Библиотечная система{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-header {
+    background: linear-gradient(135deg, #447ab0 0%, #3498db 100%);
+    padding: 2rem 0;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.form-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(68, 122, 176, 0.1);
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+.required-field::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.help-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.form-actions {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-top: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.preview-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    border-left: 3px solid var(--secondary-color);
+}
+
+.preview-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.student-preview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.preview-avatar {
+    height: 80px;
+    width: 80px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-color);
+    font-size: 2rem;
+}
+
+.preview-info {
+    flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+    .form-card {
+        padding: 1.5rem;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-actions .d-flex {
+        flex-direction: column;
+    }
+    
+    .student-preview {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="form-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'student_list' %}" class="text-white">Студенты</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">{{ title }}</li>
+            </ol>
+        </nav>
+        <h1 class="books-title text-light">{{ title }}</h1>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form method="post" class="form-card" novalidate>
+                {% csrf_token %}
+                
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h2 class="section-title">Личная информация</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label required-field">Фамилия</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.last_name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label required-field">Имя</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.first_name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.student_id.id_for_label }}" class="form-label required-field">Номер студенческого билета</label>
+                            {{ form.student_id }}
+                            {% if form.student_id.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.student_id.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.faculty.id_for_label }}" class="form-label required-field">Факультет</label>
+                            {{ form.faculty }}
+                            {% if form.faculty.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.faculty.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Preview -->
+                    <div class="preview-card">
+                        <h4>Предпросмотр:</h4>
+                        <div class="student-preview">
+                            <div class="preview-avatar">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div class="preview-info">
+                                <div class="preview-name" id="student-preview">
+                                    {% if object %}
+                                        {{ object.last_name }} {{ object.first_name }}
+                                    {% else %}
+                                        [Фамилия] [Имя]
+                                    {% endif %}
+                                </div>
+                                <div id="student-id-preview">
+                                    {% if object %}
+                                        {{ object.student_id }}
+                                    {% else %}
+                                        [Номер студенческого]
+                                    {% endif %}
+                                </div>
+                                <div id="faculty-preview">
+                                    {% if object and object.faculty %}
+                                        {{ object.faculty.name }}
+                                    {% else %}
+                                        [Факультет]
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted">Поля, помеченные *, обязательны для заполнения</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% if object %}{% url 'student_detail' object.pk %}{% else %}{% url 'student_list' %}{% endif %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Сохранить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update student preview in real-time
+    const lastNameInput = document.getElementById('{{ form.last_name.id_for_label }}');
+    const firstNameInput = document.getElementById('{{ form.first_name.id_for_label }}');
+    const studentIdInput = document.getElementById('{{ form.student_id.id_for_label }}');
+    const facultySelect = document.getElementById('{{ form.faculty.id_for_label }}');
+    const previewElement = document.getElementById('student-preview');
+    const idPreviewElement = document.getElementById('student-id-preview');
+    const facultyPreviewElement = document.getElementById('faculty-preview');
+    
+    function updatePreview() {
+        const lastName = lastNameInput.value || '[Фамилия]';
+        const firstName = firstNameInput.value || '[Имя]';
+        const studentId = studentIdInput.value || '[Номер студенческого]';
+        const facultyText = facultySelect.options[facultySelect.selectedIndex]?.text || '[Факультет]';
+        
+        previewElement.textContent = `${lastName} ${firstName}`;
+        idPreviewElement.textContent = studentId;
+        facultyPreviewElement.textContent = facultyText;
+    }
+    
+    if (lastNameInput) lastNameInput.addEventListener('input', updatePreview);
+    if (firstNameInput) firstNameInput.addEventListener('input', updatePreview);
+    if (studentIdInput) studentIdInput.addEventListener('input', updatePreview);
+    if (facultySelect) facultySelect.addEventListener('change', updatePreview);
+    
+    // Initial update
+    updatePreview();
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            event.preventDefault();
+            // Scroll to first error
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

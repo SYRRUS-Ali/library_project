@@ -1,0 +1,6 @@
+INFO 2025-09-26 15:10:54,317 autoreload Watching for file changes with StatReloader
+ERROR 2025-09-26 15:10:57,320 basehttp "GET /authors/ HTTP/1.1" 500 89780
+ERROR 2025-09-26 15:11:04,179 basehttp "GET /admin/ HTTP/1.1" 500 151580
+WARNING 2025-09-26 15:11:08,460 log Not Found: /book/
+WARNING 2025-09-26 15:11:08,460 basehttp "GET /book/ HTTP/1.1" 404 12653
+ERROR 2025-09-26 15:11:11,657 basehttp "GET /books/ HTTP/1.1" 500 128604
