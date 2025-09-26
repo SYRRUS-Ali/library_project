@@ -1,0 +1,111 @@
+{% extends 'library_app/base.html' %}
+{% load humanize %}
+
+{% block title %}Books - Library Management System{% endblock %}
+{% block icon %}book{% endblock %}
+{% block page_title %}Books{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Books</li>
+{% endblock %}
+
+{% block page_actions %}
+<div class="d-flex">
+    <form class="d-flex me-2" method="get">
+        <input type="text" name="q" class="form-control form-control-sm" 
+               placeholder="Search books..." value="{{ search_query }}">
+        <button type="submit" class="btn btn-sm btn-outline-primary ms-2">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
+    <a href="{% url 'book-add' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle"></i> Add Book
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if books %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Authors</th>
+                        <th>Publisher</th>
+                        <th>Year</th>
+                        <th>Pages</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                    <tr>
+                        <td>
+                            <strong>{{ book.title }}</strong>
+                            {% if book.isbn %}
+                            <br><small class="text-muted">ISBN: {{ book.isbn }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for author in book.authors.all %}
+                            <span class="badge bg-secondary">{{ author }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>{{ book.publisher.name|default:"-" }}</td>
+                        <td>{{ book.year|default:"-" }}</td>
+                        <td>{{ book.pages|default:"-" }}</td>
+                        <td class="action-buttons">
+                            <a href="{% url 'book-detail' book.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'book-edit' book.pk %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Previous</a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-book fs-1 text-muted"></i>
+            <h5 class="text-muted mt-3">No books found</h5>
+            <p class="text-muted">Get started by adding your first book.</p>
+            <a href="{% url 'book-add' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add First Book
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

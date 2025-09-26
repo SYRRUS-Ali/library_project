@@ -1,0 +1,176 @@
+{% extends 'library_app/base.html' %}
+{% load humanize %}
+
+{% block title %}{{ book.title }} - Library Management System{% endblock %}
+{% block icon %}book{% endblock %}
+{% block page_title %}{{ book.title }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'book-list' %}">Books</a></li>
+<li class="breadcrumb-item active">{{ book.title }}</li>
+{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <a href="{% url 'book-edit' book.pk %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-pencil"></i> Edit
+    </a>
+    <a href="{% url 'book-usage' %}?book={{ book.pk }}" class="btn btn-outline-info btn-sm">
+        <i class="bi bi-graph-up"></i> Usage Report
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Book Details -->
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h6 class="m-0 font-weight-bold">Book Details</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Title:</dt>
+                    <dd class="col-sm-9">{{ book.title }}</dd>
+
+                    <dt class="col-sm-3">Authors:</dt>
+                    <dd class="col-sm-9">
+                        {% for author in book.authors.all %}
+                        <span class="badge bg-primary">{{ author }}</span>
+                        {% endfor %}
+                    </dd>
+
+                    <dt class="col-sm-3">Publisher:</dt>
+                    <dd class="col-sm-9">{{ book.publisher.name|default:"-" }}</dd>
+
+                    <dt class="col-sm-3">Year:</dt>
+                    <dd class="col-sm-9">{{ book.year|default:"-" }}</dd>
+
+                    <dt class="col-sm-3">Pages:</dt>
+                    <dd class="col-sm-9">{{ book.pages|default:"-" }}</dd>
+
+                    <dt class="col-sm-3">Illustrations:</dt>
+                    <dd class="col-sm-9">{{ book.illustrations }}</dd>
+
+                    <dt class="col-sm-3">Price:</dt>
+                    <dd class="col-sm-9">
+                        {% if book.price %}
+                        ${{ book.price }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-3">ISBN:</dt>
+                    <dd class="col-sm-9">{{ book.isbn|default:"-" }}</dd>
+
+                    <dt class="col-sm-3">Added:</dt>
+                    <dd class="col-sm-9">{{ book.created_at|date:"M d, Y" }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h6 class="m-0 font-weight-bold">Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body py-3">
+                                <h4 class="mb-0">{{ total_loans|intcomma }}</h4>
+                                <small>Total Loans</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body py-3">
+                                <h4 class="mb-0">{{ unique_students|intcomma }}</h4>
+                                <small>Unique Students</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inventory Across Branches -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold">Inventory Across Branches</h6>
+    </div>
+    <div class="card-body">
+        {% if inventory %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Branch</th>
+                        <th>Total Copies</th>
+                        <th>Available Copies</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in inventory %}
+                    <tr>
+                        <td>{{ inv.branch.name }}</td>
+                        <td>{{ inv.total_copies }}</td>
+                        <td>{{ inv.available_copies }}</td>
+                        <td>
+                            {% if inv.available_copies > 0 %}
+                            <span class="badge bg-success">Available</span>
+                            {% else %}
+                            <span class="badge bg-danger">Out of Stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No inventory records found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Faculty Usage -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h6 class="m-0 font-weight-bold">Faculty Usage</h6>
+    </div>
+    <div class="card-body">
+        {% if faculty_usage %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Faculty</th>
+                        <th>Branch</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usage in faculty_usage %}
+                    <tr>
+                        <td>{{ usage.faculty.name }}</td>
+                        <td>{{ usage.branch.name }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No faculty usage records found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

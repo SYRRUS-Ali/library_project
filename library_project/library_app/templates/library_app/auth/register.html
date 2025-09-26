@@ -1,0 +1,54 @@
+{% extends 'library_app/base.html' %}
+{% load bootstrap5 %}
+
+{% block title %}Register - Library Management System{% endblock %}
+{% block icon %}person-plus{% endblock %}
+{% block page_title %}Register{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Register</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> Create Account</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% bootstrap_field form.username %}
+                            {% bootstrap_field form.first_name %}
+                            {% bootstrap_field form.last_name %}
+                            {% bootstrap_field form.email %}
+                        </div>
+                        <div class="col-md-6">
+                            {% bootstrap_field form.password1 %}
+                            {% bootstrap_field form.password2 %}
+                            {% bootstrap_field form.user_type %}
+                            {% bootstrap_field form.phone_number %}
+                        </div>
+                    </div>
+                    
+                    {% bootstrap_field form.address %}
+                    
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-person-plus"></i> Register
+                    </button>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'login' %}" class="text-decoration-none">
+                            Already have an account? Login here
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

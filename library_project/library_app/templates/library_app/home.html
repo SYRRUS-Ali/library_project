@@ -1,0 +1,188 @@
+{% extends 'library_app/base.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard - Library Management System{% endblock %}
+{% block icon %}speedometer2{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Statistics Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100 py-2 bg-primary text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Total Books</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ total_books|intcomma }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-book fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100 py-2 bg-success text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Branches</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ total_branches|intcomma }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-building fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100 py-2 bg-info text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Total Loans</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ total_loans|intcomma }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-arrow-left-right fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-0 shadow-sm h-100 py-2 bg-danger text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Overdue Loans</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ overdue_loans|intcomma }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Books -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="m-0 font-weight-bold">
+                    <i class="bi bi-clock-history"></i> Recently Added Books
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if recent_books %}
+                <div class="list-group list-group-flush">
+                    {% for book in recent_books %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ book.title }}</h6>
+                            <small class="text-muted">
+                                Added {{ book.created_at|timesince }} ago
+                            </small>
+                        </div>
+                        <a href="{% url 'book-detail' book.pk %}" class="btn btn-sm btn-outline-primary">
+                            View
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No books added yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Loans -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="m-0 font-weight-bold">
+                    <i class="bi bi-activity"></i> Recent Loans
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if recent_loans %}
+                <div class="list-group list-group-flush">
+                    {% for loan in recent_loans %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ loan.book.title }}</h6>
+                                <small class="text-muted">
+                                    To: {{ loan.student.last_name }}, {{ loan.student.first_name }}
+                                    • {{ loan.issue_date }}
+                                </small>
+                            </div>
+                            <span class="badge bg-{% if loan.status == 'active' %}success{% elif loan.status == 'overdue' %}danger{% else %}secondary{% endif %}">
+                                {{ loan.status|title }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No recent loans.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="m-0 font-weight-bold">
+                    <i class="bi bi-lightning"></i> Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'inventory-query' %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-search fs-4 d-block mb-2"></i>
+                            Inventory Check
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'book-usage' %}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-graph-up fs-4 d-block mb-2"></i>
+                            Book Usage
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-gear fs-4 d-block mb-2"></i>
+                            Admin Panel
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'book-add' %}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-plus-circle fs-4 d-block mb-2"></i>
+                            Add Book
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

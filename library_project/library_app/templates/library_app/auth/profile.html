@@ -1,0 +1,115 @@
+{% extends 'library_app/base.html' %}
+{% load humanize %}
+
+{% block title %}My Profile - Library Management System{% endblock %}
+{% block icon %}person{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Profile</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h6 class="m-0 font-weight-bold">User Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-person-circle fs-1 text-primary"></i>
+                    <h4 class="mt-2">{{ user.username }}</h4>
+                    <span class="badge bg-{% if user.user_type == 'admin' %}danger{% elif user.user_type == 'librarian' %}warning{% else %}success{% endif %}">
+                        {{ user.get_user_type_display }}
+                    </span>
+                </div>
+
+                <dl class="row">
+                    <dt class="col-sm-4">Name:</dt>
+                    <dd class="col-sm-8">{{ user.get_full_name|default:"Not set" }}</dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">{{ user.email|default:"Not set" }}</dd>
+
+                    <dt class="col-sm-4">Phone:</dt>
+                    <dd class="col-sm-8">{{ user.phone_number|default:"Not set" }}</dd>
+
+                    <dt class="col-sm-4">Joined:</dt>
+                    <dd class="col-sm-8">{{ user.date_joined|date:"M d, Y" }}</dd>
+
+                    <dt class="col-sm-4">Last Login:</dt>
+                    <dd class="col-sm-8">{{ user.last_login|date:"M d, Y H:i" }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <!-- User Stats -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card bg-info text-white text-center">
+                    <div class="card-body py-3">
+                        <i class="bi bi-book fs-4 d-block mb-2"></i>
+                        <h5 class="mb-0">{{ total_loans|default:0 }}</h5>
+                        <small>Total Books Borrowed</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-warning text-white text-center">
+                    <div class="card-body py-3">
+                        <i class="bi bi-clock fs-4 d-block mb-2"></i>
+                        <h5 class="mb-0">{{ active_loans|default:0 }}</h5>
+                        <small>Active Loans</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card bg-danger text-white text-center">
+                    <div class="card-body py-3">
+                        <i class="bi bi-exclamation-triangle fs-4 d-block mb-2"></i>
+                        <h5 class="mb-0">{{ overdue_loans|default:0 }}</h5>
+                        <small>Overdue Loans</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="m-0 font-weight-bold">Recent Activity</h6>
+            </div>
+            <div class="card-body">
+                {% if recent_loans %}
+                <div class="list-group list-group-flush">
+                    {% for loan in recent_loans %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ loan.book.title }}</h6>
+                                <small class="text-muted">
+                                    Issued: {{ loan.issue_date }} • 
+                                    Due: {{ loan.due_date }}
+                                    {% if loan.return_date %}
+                                    • Returned: {{ loan.return_date }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <span class="badge bg-{% if loan.status == 'active' %}success{% elif loan.status == 'overdue' %}danger{% else %}secondary{% endif %}">
+                                {{ loan.status|title }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No recent activity found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
