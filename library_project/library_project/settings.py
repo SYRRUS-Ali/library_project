@@ -20,7 +20,7 @@ SECRET_KEY = 'django-insecure-hksg%y2s5gl22dwjy-8wm3+&2o7v7q*k1%u-o577*pdced+j9+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -143,4 +143,5 @@ ACCOUNT_ACTIVATION_DAYS = 7
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 # Email backend (for development)
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
