@@ -8,6 +8,7 @@ from pathlib import Path
 import os
 import subprocess
 subprocess.call("ls", shell=True)  # تحذير أمني خطير
+API_KEY = "AKIA123456789SECRETKEY"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -147,4 +148,5 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 # Email backend (for development)
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
