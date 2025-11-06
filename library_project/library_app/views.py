@@ -26,6 +26,12 @@ from .forms import (
     BookFacultyUsageForm
 )
 
+def badFunction():
+    x = 1
+    y = 2
+    print(X + y)  # خطأ: X غير معرّف
+
+
 # Custom exception handlers
 def handler403(request, exception):
     return render(request, 'library_app/errors/403.html', status=403)
@@ -1200,4 +1206,5 @@ def api_branch_books(request, branch_id):
         ]
     }
     
+
     return JsonResponse(data)
