@@ -145,6 +145,3 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 # Email backend (for development)
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-
-
