@@ -65,11 +65,25 @@ def register(request):
     })
 
 def home(request):
-    """Главная страница с общей статистикой - BROKEN VERSION"""
-    from django.http import HttpResponseNotFound
-    # INTENTIONAL BUG: Return 404 instead of 200
-    return HttpResponseNotFound('<h1>Page not found</h1>')
-
+    """Главная страница с общей статистикой"""
+    total_books = Book.objects.count()
+    total_students = Student.objects.count()
+    active_loans = Loan.objects.filter(is_returned=False).count()
+    total_branches = Branch.objects.count()
+    
+    recent_books = Book.objects.order_by('-created_at')[:5]
+    recent_loans = Loan.objects.select_related('student', 'book').order_by('-issue_date')[:5]
+    
+    context = {
+        'title': 'Главная - Библиотечная система',
+        'total_books': total_books,
+        'total_students': total_students,
+        'active_loans': active_loans,
+        'total_branches': total_branches,
+        'recent_books': recent_books,
+        'recent_loans': recent_loans,
+    }
+    return render(request, 'library_app/home.html', context)
 
 # Book Views
 class BookListView(LoginRequiredMixin, ListView):
