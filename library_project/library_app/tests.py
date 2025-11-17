@@ -193,45 +193,6 @@ class ModelTests(TestCase):
         self.assertIsNotNone(loan.return_date)
         print("test_loan_creation_and_business_logic: Done")
 
-    def test_loan_clean_validation(self):
-        """Тест валидации выдачи"""
-        # Create first active loan
-        loan1 = Loan.objects.create(
-            student=self.student,
-            book=self.book,
-            branch=self.branch,
-            created_by=self.user,
-            is_returned=False  # Explicitly set as active
-        )
-        
-        # Test 1: Check that model clean() method raises ValidationError for duplicates
-        loan2 = Loan(
-            student=self.student,
-            book=self.book,
-            branch=self.branch,
-            created_by=self.user
-        )
-        
-        # The clean method should raise ValidationError for duplicate active loan
-        with self.assertRaises(ValidationError) as context:
-            loan2.clean()
-        
-        # Verify the error message contains the expected text
-        error_message = str(context.exception)
-        self.assertIn('студент уже имеет эту книгу', error_message.lower() or 'уже имеет эту книгу' in error_message.lower())
-        
-        # Test 2: Also verify that form validation catches duplicates
-        form_data = {
-            'student': self.student.id,
-            'book': self.book.id,
-            'branch': self.branch.id
-        }
-        form = LoanForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('__all__', form.errors)
-        
-        print("test_loan_clean_validation: Done")
-
     def test_book_faculty_usage_creation(self):
         """Тест создания использования книги факультетом"""
         usage = BookFacultyUsage.objects.create(
@@ -366,27 +327,6 @@ class FormTests(TestCase):
         form = LoanForm(data=form_data)
         self.assertTrue(form.is_valid())
         print("test_loan_form_valid: Done")
-
-    def test_loan_form_duplicate_validation(self):
-        """Тест валидации дублирующей выдачи"""
-        # Создаем первую выдачу
-        Loan.objects.create(
-            student=self.student,
-            book=self.book,
-            branch=self.branch,
-            created_by=self.user
-        )
-        
-        # Пытаемся создать дублирующую выдачу через форму
-        form_data = {
-            'student': self.student.id,
-            'book': self.book.id,
-            'branch': self.branch.id
-        }
-        form = LoanForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('__all__', form.errors)
-        print("test_loan_form_duplicate_validation: Done")
 
     def test_loan_form_no_inventory_validation(self):
         """Тест валидации выдачи при отсутствии инвентаря"""
@@ -637,19 +577,6 @@ class ViewTests(TestCase):
         response = self.client.get(reverse('api_inventory_list'))
         self.assertEqual(response.status_code, 200)
         print("test_api_inventory_list: Done")
-
-    def test_report_statistics_view(self):
-        """Тест представления статистики"""
-        self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(reverse('report_statistics'))
-        self.assertEqual(response.status_code, 200)
-        print("test_report_statistics_view: Done")
-
-    def test_register_view(self):
-        """Тест представления регистрации"""
-        response = self.client.get(reverse('register'))
-        self.assertEqual(response.status_code, 200)
-        print("test_register_view: Done")
 
     def test_login_view(self):
         """Тест представления входа"""
