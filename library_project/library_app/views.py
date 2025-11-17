@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib import messages
-from django.db import models
 from django.db.models import Q, Count, Sum, Avg
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseNotFound, HttpResponseServerError
 from django.utils import timezone
@@ -916,82 +915,146 @@ def inventory_query(request):
     return render(request, 'library_app/inventory/inventory_query.html', context)
 
 # Report Views
-class ReportsDashboardView(LoginRequiredMixin, TemplateView):
-    template_name = 'library_app/reports/dashboard.html'
+class ReportStatisticsView(LoginRequiredMixin, TemplateView):
+    template_name = 'library_app/reports/statistics.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Отчеты и аналитика'
+        context['title'] = 'Статистика библиотеки'
         
-        # Основная статистика для дашборда
+        # General statistics
         context['total_books'] = Book.objects.count()
+        context['total_authors'] = Author.objects.count()
         context['total_students'] = Student.objects.count()
         context['active_loans'] = Loan.objects.filter(is_returned=False).count()
-        context['total_branches'] = Branch.objects.count()
         context['total_loans'] = Loan.objects.count()
-        context['total_authors'] = Author.objects.count()
-        context['total_publishers'] = Publisher.objects.count()
-        context['total_faculties'] = Faculty.objects.count()
         
-        # Статистика для карточек отчетов
-        # Популярные книги - количество уникальных книг с выдачами
-        context['popular_books_count'] = Loan.objects.values('book').distinct().count()
+        # Inventory statistics
+        context['total_copies'] = BookInventory.objects.aggregate(Sum('total_copies'))['total_copies__sum'] or 0
+        context['available_copies'] = BookInventory.objects.aggregate(Sum('available_copies'))['available_copies__sum'] or 0
         
-        # Активные студенты - количество уникальных студентов с выдачами
-        context['active_students_count'] = Loan.objects.values('student').distinct().count()
+        # Popular books
+        context['popular_books'] = Loan.objects.values(
+            'book__title'
+        ).annotate(
+            loan_count=Count('id')
+        ).order_by('-loan_count')[:10]
         
-        # Факультеты
-        context['faculties_count'] = Faculty.objects.count()
+        # Active students
+        context['active_students'] = Loan.objects.values(
+            'student__last_name', 'student__first_name', 'student__student_id'
+        ).annotate(
+            loan_count=Count('id')
+        ).order_by('-loan_count')[:10]
         
-        # Инвентарь
-        inventory_stats = BookInventory.objects.aggregate(
-            total_copies=Sum('total_copies'),
-            available_copies=Sum('available_copies')
-        )
-        context['total_inventory'] = inventory_stats['total_copies'] or 0
-        context['available_copies'] = inventory_stats['available_copies'] or 0
+        return context
+
+class ReportPopularBooksView(LoginRequiredMixin, TemplateView):
+    template_name = 'library_app/reports/popular_books.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Популярные книги'
         
-        # Максимальные значения для отображения
-        # Самая популярная книга
-        max_book_loans = Loan.objects.values('book__title').annotate(
-            count=Count('id')
-        ).order_by('-count').first()
-        context['max_loans'] = max_book_loans['count'] if max_book_loans else 0
+        period = self.request.GET.get('period', 'all')
+        branch_filter = self.request.GET.get('branch', '')
         
-        # Самый активный студент
-        max_student_loans = Loan.objects.values('student').annotate(
-            count=Count('id')
-        ).order_by('-count').first()
-        context['max_student_loans'] = max_student_loans['count'] if max_student_loans else 0
+        # Filter by period
+        if period == 'month':
+            start_date = timezone.now() - timedelta(days=30)
+            loans = Loan.objects.filter(issue_date__gte=start_date)
+        elif period == 'year':
+            start_date = timezone.now() - timedelta(days=365)
+            loans = Loan.objects.filter(issue_date__gte=start_date)
+        else:
+            loans = Loan.objects.all()
         
-        # Процент возвратов
-        returned_loans = Loan.objects.filter(is_returned=True).count()
-        context['return_rate'] = round((returned_loans / context['total_loans'] * 100), 1) if context['total_loans'] > 0 else 0
+        # Filter by branch
+        if branch_filter:
+            loans = loans.filter(branch__id=branch_filter)
         
-        # Статистика по факультетам
-        faculty_stats = Loan.objects.values('student__faculty__name').annotate(
-            count=Count('id')
-        ).order_by('-count').first()
-        context['max_faculty_usage'] = faculty_stats['count'] if faculty_stats else 0
+        context['popular_books'] = loans.values(
+            'book__title', 'book__publication_year', 'book__authors__last_name', 'book__authors__first_name'
+        ).annotate(
+            loan_count=Count('id'),
+            avg_loan_duration=Avg(
+                models.Case(
+                    models.When(
+                        return_date__isnull=False,
+                        then=models.F('return_date') - models.F('issue_date')
+                    ),
+                    default=None,
+                    output_field=models.DurationField()
+                )
+            )
+        ).order_by('-loan_count')[:20]
         
-        # Последние активности
-        context['recent_loans'] = Loan.objects.select_related('student', 'book', 'branch').order_by('-issue_date')[:5]
+        context['branches'] = Branch.objects.all()
+        context['period'] = period
+        context['branch_filter'] = branch_filter
         
-        # Статистика по филиалам
-        context['branch_stats'] = Branch.objects.annotate(
-            book_count=Count('inventory', distinct=True),
-            active_loans_count=Count('loans', filter=Q(loans__is_returned=False))
-        )[:3]
+        return context
+
+class ReportActiveStudentsView(LoginRequiredMixin, TemplateView):
+    template_name = 'library_app/reports/active_students.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Активные студенты'
         
-        # Статистика по жанрам/категориям (если есть поле category в Book)
-        try:
-            # Если у книг есть поле category или genre
-            genre_stats = Book.objects.values('category').annotate(
-                count=Count('id')
-            ).order_by('-count')[:5]
-            context['genre_stats'] = genre_stats
-        except:
-            context['genre_stats'] = []
+        period = self.request.GET.get('period', 'all')
+        faculty_filter = self.request.GET.get('faculty', '')
+        
+        # Filter by period
+        if period == 'month':
+            start_date = timezone.now() - timedelta(days=30)
+            loans = Loan.objects.filter(issue_date__gte=start_date)
+        elif period == 'year':
+            start_date = timezone.now() - timedelta(days=365)
+            loans = Loan.objects.filter(issue_date__gte=start_date)
+        else:
+            loans = Loan.objects.all()
+        
+        # Filter by faculty
+        if faculty_filter:
+            loans = loans.filter(student__faculty__id=faculty_filter)
+        
+        context['active_students'] = loans.values(
+            'student__last_name', 'student__first_name', 'student__student_id', 'student__faculty__name'
+        ).annotate(
+            loan_count=Count('id'),
+            active_loans=Count('id', filter=Q(is_returned=False)),
+            avg_loan_duration=Avg(
+                models.Case(
+                    models.When(
+                        return_date__isnull=False,
+                        then=models.F('return_date') - models.F('issue_date')
+                    ),
+                    default=None,
+                    output_field=models.DurationField()
+                )
+            )
+        ).order_by('-loan_count')[:20]
+        
+        context['faculties'] = Faculty.objects.all()
+        context['period'] = period
+        context['faculty_filter'] = faculty_filter
+        
+        return context
+
+class ReportBranchesView(LoginRequiredMixin, TemplateView):
+    template_name = 'library_app/reports/branches.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Статистика по филиалам'
+        
+        context['branches_stats'] = Branch.objects.annotate(
+            total_books=Sum('inventory__total_copies'),
+            available_books=Sum('inventory__available_copies'),
+            active_loans=Count('loans', filter=Q(loans__is_returned=False)),
+            total_loans=Count('loans')
+        ).order_by('name')
         
         return context
 
@@ -1200,6 +1263,4 @@ def api_branch_books(request, branch_id):
         ]
     }
     
-
     return JsonResponse(data)
-
