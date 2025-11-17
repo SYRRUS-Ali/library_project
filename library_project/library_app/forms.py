@@ -79,10 +79,29 @@ class LoanForm(forms.ModelForm):
         }
     
     def clean(self):
-        """Валидация формы - BROKEN VERSION"""
         cleaned_data = super().clean()
-        # BROKEN: Remove all validation logic
-        return cleaned_data  # No validation at all
+        student = cleaned_data.get('student')
+        book = cleaned_data.get('book')
+        branch = cleaned_data.get('branch')
+        
+        if student and book and branch:
+            # Check if student already has this book
+            active_loan = Loan.objects.filter(
+                student=student, 
+                book=book, 
+                is_returned=False
+            ).exists()
+            
+            if active_loan:
+                raise ValidationError('Студент уже имеет эту книгу на руках')
+            
+            # Check inventory
+            try:
+                inventory = BookInventory.objects.get(book=book, branch=branch)
+                if inventory.available_copies <= 0:
+                    raise ValidationError('Нет доступных экземпляров этой книги в указанном филиале')
+            except BookInventory.DoesNotExist:
+                raise ValidationError('Книга не найдена в инвентаре указанного филиала')
 
 class InventoryForm(forms.ModelForm):
     class Meta:
