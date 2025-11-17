@@ -7,10 +7,10 @@ from .models import (
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ('last_name', 'first_name', 'middle_name')
+    list_display = ('last_name', 'last_name', 'middle_name')
     list_filter = ('last_name',)
-    search_fields = ('last_name', 'first_name', 'middle_name')
-    ordering = ('last_name', 'first_name')
+    search_fields = ('last_name', 'last_name', 'middle_name')
+    ordering = ('last_name', 'last_name')
 
 @admin.register(Publisher)
 class PublisherAdmin(admin.ModelAdmin):
