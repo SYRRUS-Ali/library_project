@@ -1,0 +1,811 @@
+Feature test running
+[
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2025-09-26T13:20:28.492Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "1",
+    "object_repr": "FIT",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2025-09-26T13:20:30.716Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "1",
+    "object_repr": "Mehrez Mohammad (St215145)",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 3,
+  "fields": {
+    "action_time": "2025-09-26T13:58:38.711Z",
+    "user": 1,
+    "content_type": 14,
+    "object_id": "1",
+    "object_repr": "The heart of the sea в F1: 2/2",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 1,
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": 1,
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 2,
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": 1,
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 3,
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": 1,
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 4,
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": 1,
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 5,
+  "fields": {
+    "name": "Can add permission",
+    "content_type": 2,
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 6,
+  "fields": {
+    "name": "Can change permission",
+    "content_type": 2,
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 7,
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": 2,
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 8,
+  "fields": {
+    "name": "Can view permission",
+    "content_type": 2,
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 9,
+  "fields": {
+    "name": "Can add group",
+    "content_type": 3,
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 10,
+  "fields": {
+    "name": "Can change group",
+    "content_type": 3,
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 11,
+  "fields": {
+    "name": "Can delete group",
+    "content_type": 3,
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 12,
+  "fields": {
+    "name": "Can view group",
+    "content_type": 3,
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 13,
+  "fields": {
+    "name": "Can add user",
+    "content_type": 4,
+    "codename": "add_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 14,
+  "fields": {
+    "name": "Can change user",
+    "content_type": 4,
+    "codename": "change_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 15,
+  "fields": {
+    "name": "Can delete user",
+    "content_type": 4,
+    "codename": "delete_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 16,
+  "fields": {
+    "name": "Can view user",
+    "content_type": 4,
+    "codename": "view_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 17,
+  "fields": {
+    "name": "Can add content type",
+    "content_type": 5,
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 18,
+  "fields": {
+    "name": "Can change content type",
+    "content_type": 5,
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 19,
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": 5,
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 20,
+  "fields": {
+    "name": "Can view content type",
+    "content_type": 5,
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 21,
+  "fields": {
+    "name": "Can add session",
+    "content_type": 6,
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 22,
+  "fields": {
+    "name": "Can change session",
+    "content_type": 6,
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 23,
+  "fields": {
+    "name": "Can delete session",
+    "content_type": 6,
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 24,
+  "fields": {
+    "name": "Can view session",
+    "content_type": 6,
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 25,
+  "fields": {
+    "name": "Can add автор",
+    "content_type": 7,
+    "codename": "add_author"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 26,
+  "fields": {
+    "name": "Can change автор",
+    "content_type": 7,
+    "codename": "change_author"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 27,
+  "fields": {
+    "name": "Can delete автор",
+    "content_type": 7,
+    "codename": "delete_author"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 28,
+  "fields": {
+    "name": "Can view автор",
+    "content_type": 7,
+    "codename": "view_author"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 29,
+  "fields": {
+    "name": "Can add книга",
+    "content_type": 8,
+    "codename": "add_book"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 30,
+  "fields": {
+    "name": "Can change книга",
+    "content_type": 8,
+    "codename": "change_book"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 31,
+  "fields": {
+    "name": "Can delete книга",
+    "content_type": 8,
+    "codename": "delete_book"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 32,
+  "fields": {
+    "name": "Can view книга",
+    "content_type": 8,
+    "codename": "view_book"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 33,
+  "fields": {
+    "name": "Can add филиал",
+    "content_type": 9,
+    "codename": "add_branch"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 34,
+  "fields": {
+    "name": "Can change филиал",
+    "content_type": 9,
+    "codename": "change_branch"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 35,
+  "fields": {
+    "name": "Can delete филиал",
+    "content_type": 9,
+    "codename": "delete_branch"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 36,
+  "fields": {
+    "name": "Can view филиал",
+    "content_type": 9,
+    "codename": "view_branch"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 37,
+  "fields": {
+    "name": "Can add факультет",
+    "content_type": 10,
+    "codename": "add_faculty"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 38,
+  "fields": {
+    "name": "Can change факультет",
+    "content_type": 10,
+    "codename": "change_faculty"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 39,
+  "fields": {
+    "name": "Can delete факультет",
+    "content_type": 10,
+    "codename": "delete_faculty"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 40,
+  "fields": {
+    "name": "Can view факультет",
+    "content_type": 10,
+    "codename": "view_faculty"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 41,
+  "fields": {
+    "name": "Can add издательство",
+    "content_type": 11,
+    "codename": "add_publisher"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 42,
+  "fields": {
+    "name": "Can change издательство",
+    "content_type": 11,
+    "codename": "change_publisher"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 43,
+  "fields": {
+    "name": "Can delete издательство",
+    "content_type": 11,
+    "codename": "delete_publisher"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 44,
+  "fields": {
+    "name": "Can view издательство",
+    "content_type": 11,
+    "codename": "view_publisher"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 45,
+  "fields": {
+    "name": "Can add студент",
+    "content_type": 12,
+    "codename": "add_student"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 46,
+  "fields": {
+    "name": "Can change студент",
+    "content_type": 12,
+    "codename": "change_student"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 47,
+  "fields": {
+    "name": "Can delete студент",
+    "content_type": 12,
+    "codename": "delete_student"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 48,
+  "fields": {
+    "name": "Can view студент",
+    "content_type": 12,
+    "codename": "view_student"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 49,
+  "fields": {
+    "name": "Can add выдача",
+    "content_type": 13,
+    "codename": "add_loan"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 50,
+  "fields": {
+    "name": "Can change выдача",
+    "content_type": 13,
+    "codename": "change_loan"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 51,
+  "fields": {
+    "name": "Can delete выдача",
+    "content_type": 13,
+    "codename": "delete_loan"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 52,
+  "fields": {
+    "name": "Can view выдача",
+    "content_type": 13,
+    "codename": "view_loan"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 53,
+  "fields": {
+    "name": "Can add инвентаризация",
+    "content_type": 14,
+    "codename": "add_bookinventory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 54,
+  "fields": {
+    "name": "Can change инвентаризация",
+    "content_type": 14,
+    "codename": "change_bookinventory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 55,
+  "fields": {
+    "name": "Can delete инвентаризация",
+    "content_type": 14,
+    "codename": "delete_bookinventory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 56,
+  "fields": {
+    "name": "Can view инвентаризация",
+    "content_type": 14,
+    "codename": "view_bookinventory"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 57,
+  "fields": {
+    "name": "Can add использование книги факультетом",
+    "content_type": 15,
+    "codename": "add_bookfacultyusage"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 58,
+  "fields": {
+    "name": "Can change использование книги факультетом",
+    "content_type": 15,
+    "codename": "change_bookfacultyusage"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 59,
+  "fields": {
+    "name": "Can delete использование книги факультетом",
+    "content_type": 15,
+    "codename": "delete_bookfacultyusage"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 60,
+  "fields": {
+    "name": "Can view использование книги факультетом",
+    "content_type": 15,
+    "codename": "view_bookfacultyusage"
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$y0AR83FlETjesv9M10d8aZ$qoHJ24M50/cppTSrJlAsDdHqSDvy+EG5CCrMpuhkcCU=",
+    "last_login": "2025-11-23T14:30:09.071Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-09-26T12:43:39.521Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 1,
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 2,
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 3,
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 4,
+  "fields": {
+    "app_label": "auth",
+    "model": "user"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 5,
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 6,
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 7,
+  "fields": {
+    "app_label": "library_app",
+    "model": "author"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 8,
+  "fields": {
+    "app_label": "library_app",
+    "model": "book"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 9,
+  "fields": {
+    "app_label": "library_app",
+    "model": "branch"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 10,
+  "fields": {
+    "app_label": "library_app",
+    "model": "faculty"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 11,
+  "fields": {
+    "app_label": "library_app",
+    "model": "publisher"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 12,
+  "fields": {
+    "app_label": "library_app",
+    "model": "student"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 13,
+  "fields": {
+    "app_label": "library_app",
+    "model": "loan"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 14,
+  "fields": {
+    "app_label": "library_app",
+    "model": "bookinventory"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 15,
+  "fields": {
+    "app_label": "library_app",
+    "model": "bookfacultyusage"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "a7uzzl5mzzb3g2zr45yxpn5iu9chjb1c",
+  "fields": {
+    "session_data": ".eJxVjE0OwiAYBe_C2hD4wAIu3XsG8viTqqFJaVfGu9smXej2zcx7M491qX7tefZjYhcm2el3C4jP3HaQHmj3icepLfMY-K7wg3Z-m1J-XQ_376Ci161GKcJREAZKU1LIDnJQxSJCumAsGRU12azlWQ2FkgW0IEebLawrYJ8v4_03ZA:1vNB6P:jy2YmTzian1KHBSWqIRWO9WN20EpLtJLz0Dq8bWJLic",
+    "expire_date": "2025-12-07T14:30:09.085Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "inugwyj1g0gt6huhwind2s0usrqsakyz",
+  "fields": {
+    "session_data": ".eJxVjE0OwiAYBe_C2hD4wAIu3XsG8viTqqFJaVfGu9smXej2zcx7M491qX7tefZjYhcm2el3C4jP3HaQHmj3icepLfMY-K7wg3Z-m1J-XQ_376Ci161GKcJREAZKU1LIDnJQxSJCumAsGRU12azlWQ2FkgW0IEebLawrYJ8v4_03ZA:1v291P:A4c9TGFoQSDrowGi3qbGwAR3SRFMWtiq8hLryFTN8ms",
+    "expire_date": "2025-10-10T14:02:03.973Z"
+  }
+},
+{
+  "model": "library_app.author",
+  "pk": 2,
+  "fields": {
+    "last_name": "Alfredo",
+    "first_name": "Mark",
+    "middle_name": null
+  }
+},
+{
+  "model": "library_app.publisher",
+  "pk": 1,
+  "fields": {
+    "name": "publisher test",
+    "address": ""
+  }
+},
+{
+  "model": "library_app.book",
+  "pk": 1,
+  "fields": {
+    "title": "The heart of the sea",
+    "description": null,
+    "publisher": 1,
+    "publication_year": 1987,
+    "page_count": 550,
+    "illustration_count": 100,
+    "price": "1300.00",
+    "created_at": "2025-09-26T13:46:17.059Z",
+    "updated_at": "2025-09-26T13:46:53.599Z",
+    "authors": [
+      2
+    ]
+  }
+},
+{
+  "model": "library_app.branch",
+  "pk": 1,
+  "fields": {
+    "name": "F1",
+    "address": "",
+    "created_at": "2025-09-26T13:48:17.634Z"
+  }
+},
+{
+  "model": "library_app.bookinventory",
+  "pk": 1,
+  "fields": {
+    "book": 1,
+    "branch": 1,
+    "total_copies": 4,
+    "available_copies": 3,
+    "last_updated": "2025-09-26T14:02:03.945Z"
+  }
+},
+{
+  "model": "library_app.faculty",
+  "pk": 1,
+  "fields": {
+    "name": "FIT",
+    "description": "",
+    "created_at": "2025-09-26T13:20:28.490Z"
+  }
+},
+{
+  "model": "library_app.student",
+  "pk": 1,
+  "fields": {
+    "last_name": "Mehrez",
+    "first_name": "Mohammad",
+    "student_id": "St215145",
+    "faculty": 1,
+    "created_at": "2025-09-26T13:20:30.714Z"
+  }
+}
+]
