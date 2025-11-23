@@ -52,6 +52,7 @@ class Publisher(models.Model):
 class Book(models.Model):
     """Модель книги"""
     title = models.CharField(_('название'), max_length=300)
+    description = models.CharField(_('Desciption'), null=True, max_length=800)
     authors = models.ManyToManyField(Author, verbose_name=_('авторы'), related_name='books')
     publisher = models.ForeignKey(
         Publisher, 
