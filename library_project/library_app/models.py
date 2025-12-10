@@ -12,6 +12,7 @@ class Author(models.Model):
     last_name = models.CharField(_('фамилия'), max_length=100)
     first_name = models.CharField(_('имя'), max_length=100)
     middle_name = models.CharField(_('отчество'), max_length=100, blank=True, null=True)
+    nickname = models.CharField(_('Nickname'), max_length=100, blank=True, null=True)
     
     class Meta:
         verbose_name = _('автор')
@@ -52,8 +53,8 @@ class Publisher(models.Model):
 class Book(models.Model):
     """Модель книги"""
     title = models.CharField(_('название'), max_length=300)
-    description = models.CharField(_('Desciption'), null=True, max_length=800)
     authors = models.ManyToManyField(Author, verbose_name=_('авторы'), related_name='books')
+    isbn = models.CharField(max_length=20, null=True, blank=True)
     publisher = models.ForeignKey(
         Publisher, 
         verbose_name=_('издательство'), 
@@ -372,3 +373,88 @@ class Loan(models.Model):
             inventory.save()
         
         super().delete(*args, **kwargs)
+
+# Add this to your models.py file in the library_app
+class ReadingRoom(models.Model):
+    """
+    Модель читального зала в филиале библиотеки
+    """
+    name = models.CharField(
+        _('название читального зала'), 
+        max_length=200,
+        help_text=_('Например: "Читальный зал №1" или "Зал научной литературы"')
+    )
+    branch = models.ForeignKey(
+        'Branch',
+        verbose_name=_('филиал'),
+        on_delete=models.CASCADE,
+        related_name='reading_rooms'
+    )
+    capacity = models.PositiveIntegerField(
+        _('вместимость'),
+        default=20,
+        help_text=_('Максимальное количество мест в читальном зале')
+    )
+    has_computers = models.BooleanField(
+        _('наличие компьютеров'),
+        default=False
+    )
+    opening_time = models.TimeField(
+        _('время открытия'),
+        default='08:00'
+    )
+    closing_time = models.TimeField(
+        _('время закрытия'),
+        default='20:00'
+    )
+    is_active = models.BooleanField(
+        _('активен'),
+        default=True
+    )
+    created_at = models.DateTimeField(_('дата создания'), auto_now_add=True)
+    
+    class Meta:
+        verbose_name = _('читальный зал')
+        verbose_name_plural = _('читальные залы')
+        ordering = ['branch', 'name']
+        unique_together = ['name', 'branch']
+    
+    def __str__(self):
+        return f"{self.name} ({self.branch.name})"
+    
+    def clean(self):
+        """Валидация данных читального зала"""
+        if not self.name.strip():
+            raise ValidationError({'name': _('Название читального зала обязательно')})
+        
+        if self.capacity < 1:
+            raise ValidationError({
+                'capacity': _('Вместимость должна быть не менее 1 места')
+            })
+        
+        if self.closing_time <= self.opening_time:
+            raise ValidationError({
+                'closing_time': _('Время закрытия должно быть позже времени открытия')
+            })
+    
+    def current_occupancy(self):
+        """Возвращает текущую занятость читального зала"""
+        return 0
+    
+    def available_seats(self):
+        """Возвращает количество свободных мест"""
+        return max(0, self.capacity - self.current_occupancy())
+    
+    def is_open_now(self):
+        """Проверяет, открыт ли читальный зал в текущее время"""
+        from django.utils import timezone
+        current_time = timezone.now().time()
+        
+        if not self.is_active:
+            return False
+        
+        return self.opening_time <= current_time <= self.closing_time
+    
+    def working_hours(self):
+        """Возвращает строку с рабочими часами"""
+        return f"{self.opening_time.strftime('%H:%M')} - {self.closing_time.strftime('%H:%M')}"
