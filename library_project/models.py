@@ -12,6 +12,7 @@ class Author(models.Model):
     last_name = models.CharField(_('фамилия'), max_length=100)
     first_name = models.CharField(_('имя'), max_length=100)
     middle_name = models.CharField(_('отчество'), max_length=100, blank=True, null=True)
+    nickname = models.CharField(_('Nickname'), max_length=100, blank=True, null=True)
     
     class Meta:
         verbose_name = _('автор')
